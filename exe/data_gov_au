@@ -2,7 +2,7 @@
 # data_gov_au
 
 # 20261103
-# 0.1.0
+# 0.2.0
 
 require 'switches.rb'
 require 'yaml'
@@ -14,6 +14,7 @@ BYTES_PER_KILOBYTE = 1024
 BYTES_PER_MEGABYTE = 1_048_576
 CONFIG_PATH = '~/.config/data_gov_au/config.yaml'
 DATASETS = ['abr']
+SECONDS_PER_MINUTE = 60
 SETTINGS = [:api_url, :data_directory, :user_agent]
 
 def usage
@@ -27,6 +28,7 @@ def usage
   puts "Options:"
   puts "  -d, --data-directory DIR  Where every dataset is kept (default: $XDG_DATA_HOME/data_gov_au)"
   puts "  -n, --dry-run             Report what would be retrieved without retrieving it"
+  puts "  -p, --parse               Parse the newest release held, retrieving nothing"
   puts "  -q, --quiet               Report nothing but errors"
   puts "  -h, --help                Show this help"
 end
@@ -35,6 +37,7 @@ def switches
   @switches ||= Switches.new do |s|
     s.optional(:d, :data_directory){'Where every dataset is kept (default: $XDG_DATA_HOME/data_gov_au)'}
     s.boolean(:n, :dry_run){'Report what would be retrieved without retrieving it'}
+    s.boolean(:p, :parse){'Parse the newest release held, retrieving nothing'}
     s.boolean(:q, :quiet){'Report nothing but errors'}
     s.perform(:h, :help?) do
       usage
@@ -85,6 +88,15 @@ def fetch
   @fetch ||= DataGovAu::ABR::Fetch.new(config)
 end
 
+# The newest release on disk, which is read from the directory names and so costs nothing: parsing goes nowhere near the network.
+def held_release
+  @held_release ||= (
+    date = DataGovAu::ABR::Release.dates_held(config).first
+    raise DataGovAu::ABR::NothingToParse, "no release is held in #{config.releases_directory}" unless date
+    DataGovAu::ABR::Release.new(config, date)
+  )
+end
+
 def report(message)
   puts message unless switches.quiet?
 end
@@ -93,6 +105,13 @@ def reported_size(size)
   return 'size unknown' if size.nil?
   return "#{(size.to_f / BYTES_PER_MEGABYTE).round} MB" if size >= BYTES_PER_MEGABYTE
   "#{(size.to_f / BYTES_PER_KILOBYTE).round} kB"
+end
+
+# Rounded before it is divided, so that no duration reads as 60 seconds.
+def reported_duration(seconds)
+  whole_seconds = seconds.round
+  return "#{whole_seconds} s" if whole_seconds < SECONDS_PER_MINUTE
+  "#{whole_seconds / SECONDS_PER_MINUTE} m #{whole_seconds % SECONDS_PER_MINUTE} s"
 end
 
 def describe(resource)
@@ -112,6 +131,37 @@ def retrieve_release
   fetch.perform{|resource| report("  #{resource.filename}")}
 end
 
+def fetch_release
+  report_release
+  retrieve_release unless switches.dry_run?
+end
+
+# Each file is set against the count it carries itself, so that a file which gave up fewer records than it promised, or which reports an error, is reported rather than passing as a smaller week.
+def parse_release
+  report("release:   #{held_release}")
+  started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  records = 0
+  not_whole = []
+  DataGovAu::ABR::Extract.new(held_release).each_file do |member, parser|
+    parser.each_record{}
+    records += parser.records_parsed
+    report(file_report(member, parser))
+    not_whole << member unless parser.whole?
+  end
+  report("total:     #{records} records in #{reported_duration(Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)}")
+  report_not_whole(not_whole) unless not_whole.empty?
+end
+
+def file_report(member, parser)
+  line = "  #{member}  #{parser.records_parsed} of #{parser.record_count}"
+  return line if parser.error_free?
+  "#{line}  error: #{parser.error || 'not given'}"
+end
+
+def report_not_whole(members)
+  report_failure("fewer records than promised, or an error reported, in #{members.join(', ')}")
+end
+
 def report_failure(message)
   $stderr.puts "data_gov_au: #{message}"
   exit 1
@@ -123,10 +173,10 @@ def check_dataset
 end
 
 def main
+  $stdout.sync = true
   switches
   check_dataset
-  report_release
-  retrieve_release unless switches.dry_run?
+  switches.parse? ? parse_release : fetch_release
 rescue DataGovAu::Error => error
   report_failure(error.message)
 end

@@ -15,6 +15,16 @@ describe DataGovAu::ABR::Fetch do
       end
     end
 
+    # A release is named from the first of these, so where they fall matters: by their characters alone, Part 10 would come between Part 1 and Part 2.
+    it "orders the halves by the numbers in their names, not by their characters" do
+      Dir.mktmpdir do |directory|
+        resources = default_resources + [extract_resource('ABN Bulk Extract Part 10', 'public_split_91_100.zip', '2026-10-27T21:39:23', 40)]
+        stub_catalogue({'success' => true, 'result' => package(resources: resources)})
+        names = DataGovAu::ABR::Fetch.new(config_in(directory)).extract_resources.collect(&:name)
+        _(names).must_equal ['ABN Bulk Extract Part 1', 'ABN Bulk Extract Part 2 ', 'ABN Bulk Extract Part 10']
+      end
+    end
+
     it "takes the schema and readme as supporting resources" do
       Dir.mktmpdir do |directory|
         formats = DataGovAu::ABR::Fetch.new(config_in(directory)).supporting_resources.collect(&:format)

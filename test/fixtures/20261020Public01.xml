@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Transfer error="none">
+  <TransferInfo>
+    <FileSequenceNumber>1</FileSequenceNumber>
+    <RecordCount>9</RecordCount>
+    <ExtractTime>2026-10-20T03:17:42</ExtractTime>
+  </TransferInfo>
+  <ABR recordLastUpdatedDate="20261013" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261012">11111111111</ABN>
+    <EntityType>
+      <EntityTypeInd>IND</EntityTypeInd>
+      <EntityTypeText>Individual/Sole Trader</EntityTypeText>
+    </EntityType>
+    <LegalEntity>
+      <IndividualName type="LGL">
+        <GivenName>JOHN</GivenName>
+        <FamilyName>SMITH</FamilyName>
+      </IndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3000</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </LegalEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261014" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261013">22222222222</ABN>
+    <EntityType>
+      <EntityTypeInd>IND</EntityTypeInd>
+      <EntityTypeText>Individual/Sole Trader</EntityTypeText>
+    </EntityType>
+    <LegalEntity>
+      <IndividualName type="LGL">
+        <NameTitle>MS</NameTitle>
+        <GivenName>ANNE</GivenName>
+        <GivenName>MARIE</GivenName>
+        <FamilyName>NGUYEN</FamilyName>
+      </IndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3121</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </LegalEntity>
+    <GST status="ACT" GSTStatusFromDate="20261013"></GST>
+    <OtherEntity>
+      <NonIndividualName type="BN">
+        <NonIndividualNameText>RICHMOND REMEDIAL MASSAGE</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261015" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261015">33333333333</ABN>
+    <EntityType>
+      <EntityTypeInd>PRV</EntityTypeInd>
+      <EntityTypeText>Australian Private Company</EntityTypeText>
+    </EntityType>
+    <MainEntity>
+      <NonIndividualName type="MN">
+        <NonIndividualNameText>SMITH PLUMBING PTY LTD</NonIndividualNameText>
+      </NonIndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3182</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </MainEntity>
+    <ASICNumber ASICNumberType="ACN">123456789</ASICNumber>
+    <GST status="ACT" GSTStatusFromDate="20261015"></GST>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261015" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261014">44444444444</ABN>
+    <EntityType>
+      <EntityTypeInd>PRV</EntityTypeInd>
+      <EntityTypeText>Australian Private Company</EntityTypeText>
+    </EntityType>
+    <MainEntity>
+      <NonIndividualName type="MN">
+        <NonIndividualNameText>HARBOUR DIGITAL PTY LTD</NonIndividualNameText>
+      </NonIndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>NSW</State>
+          <Postcode>2000</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </MainEntity>
+    <ASICNumber ASICNumberType="ACN">987654321</ASICNumber>
+    <OtherEntity>
+      <NonIndividualName type="TRD">
+        <NonIndividualNameText>HARBOUR DIGITAL</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261016" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261016">55555555555</ABN>
+    <EntityType>
+      <EntityTypeInd>DTT</EntityTypeInd>
+      <EntityTypeText>Discretionary Trading Trust</EntityTypeText>
+    </EntityType>
+    <MainEntity>
+      <NonIndividualName type="MN">
+        <NonIndividualNameText>THE TRUSTEE FOR KOWALSKI FAMILY TRUST</NonIndividualNameText>
+      </NonIndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3844</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </MainEntity>
+    <GST status="ACT" GSTStatusFromDate="20261016"></GST>
+    <OtherEntity>
+      <NonIndividualName type="BN">
+        <NonIndividualNameText>KOWALSKI EARTHMOVING</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20260902" replaced="N">
+    <ABN status="CAN" ABNStatusFromDate="20260901">66666666666</ABN>
+    <EntityType>
+      <EntityTypeInd>IND</EntityTypeInd>
+      <EntityTypeText>Individual/Sole Trader</EntityTypeText>
+    </EntityType>
+    <LegalEntity>
+      <IndividualName type="LGL">
+        <GivenName>PETER</GivenName>
+        <FamilyName>OBRIEN</FamilyName>
+      </IndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3350</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </LegalEntity>
+    <GST status="CAN" GSTStatusFromDate="20250630"></GST>
+    <OtherEntity>
+      <NonIndividualName type="BN">
+        <NonIndividualNameText>BALLARAT BIKE REPAIRS</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261011" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261010">77777777777</ABN>
+    <EntityType>
+      <EntityTypeInd>SMF</EntityTypeInd>
+      <EntityTypeText>ATO Regulated Self-Managed Superannuation Fund</EntityTypeText>
+    </EntityType>
+    <MainEntity>
+      <NonIndividualName type="MN">
+        <NonIndividualNameText>SMITH SUPERANNUATION FUND</NonIndividualNameText>
+      </NonIndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3101</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </MainEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261017" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20180704">88888888888</ABN>
+    <EntityType>
+      <EntityTypeInd>PUB</EntityTypeInd>
+      <EntityTypeText>Australian Public Company</EntityTypeText>
+    </EntityType>
+    <MainEntity>
+      <NonIndividualName type="MN">
+        <NonIndividualNameText>GEELONG COMMUNITY WORKS &amp; TRAINING LIMITED</NonIndividualNameText>
+      </NonIndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State>VIC</State>
+          <Postcode>3220</Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </MainEntity>
+    <ASICNumber ASICNumberType="ACN">111222333</ASICNumber>
+    <GST status="ACT" GSTStatusFromDate="20180704"></GST>
+    <DGR status="ACT" DGRStatusFromDate="20190101"></DGR>
+    <DGR DGRStatusFromDate="20200401">
+      <NonIndividualName type="DGR">
+        <NonIndividualNameText>GEELONG COMMUNITY WORKS PUBLIC FUND</NonIndividualNameText>
+      </NonIndividualName>
+    </DGR>
+    <OtherEntity>
+      <NonIndividualName type="BN">
+        <NonIndividualNameText>GEELONG COMMUNITY WORKS</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+    <OtherEntity>
+      <NonIndividualName type="TRD">
+        <NonIndividualNameText>GCW's Training</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+    <OtherEntity>
+      <NonIndividualName type="OTN">
+        <NonIndividualNameText>GEELONG COMMUNITY WORKS INC</NonIndividualNameText>
+      </NonIndividualName>
+    </OtherEntity>
+  </ABR>
+  <ABR recordLastUpdatedDate="20261019" replaced="N">
+    <ABN status="ACT" ABNStatusFromDate="20261018">99999999999</ABN>
+    <EntityType>
+      <EntityTypeInd>IND</EntityTypeInd>
+      <EntityTypeText>Individual/Sole Trader</EntityTypeText>
+    </EntityType>
+    <LegalEntity>
+      <IndividualName type="LGL">
+        <FamilyName>TEOFILO</FamilyName>
+      </IndividualName>
+      <BusinessAddress>
+        <AddressDetails>
+          <State></State>
+          <Postcode></Postcode>
+        </AddressDetails>
+      </BusinessAddress>
+    </LegalEntity>
+    <GST status="NON" GSTStatusFromDate="19000101"></GST>
+  </ABR>
+</Transfer>

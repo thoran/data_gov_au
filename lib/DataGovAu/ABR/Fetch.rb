@@ -5,6 +5,7 @@ require_relative '../Catalogue'
 require_relative './Error'
 require_relative './ExtractDate'
 require_relative './Release'
+require_relative '../../Thoran/String/NaturalComparison/natural_comparison'
 
 module DataGovAu
   module ABR
@@ -20,17 +21,17 @@ module DataGovAu
         @dataset ||= catalogue.dataset(DATASET)
       end
 
-      # The zipped halves of the extract. Sorted by name only so that what is reported comes out in a settled order; nothing downstream depends on which half is which.
+      # The zipped halves of the extract, in the order the catalogue's own names put them: the first is the one a release is named from. Sorted by the numbers in those names rather than by their characters, so that a tenth part would not come between the first and the second.
       def extract_resources
-        @extract_resources ||= dataset.resources.select{|resource| resource.format == EXTRACT_FORMAT}.sort_by{|resource| resource.name.to_s}
+        @extract_resources ||= dataset.resources.select{|resource| resource.format == EXTRACT_FORMAT}.sort{|a, b| a.name.to_s.natural_comparison(b.name.to_s)}
       end
 
-      # The schema and the readme, kept alongside each release so that a release on disk carries what is needed to read it.
+      # Every other resource of the dataset, the schema, the readme and the list of resources among them, kept alongside each release so that a release on disk carries what is needed to read it.
       def supporting_resources
         @supporting_resources ||= dataset.resources.reject{|resource| resource.format == EXTRACT_FORMAT}
       end
 
-      # The extract's own halves and the schema and readme alongside them, so that a release on disk carries what is needed to read it without going back to the catalogue.
+      # The extract's own halves and the resources alongside them, so that a release on disk carries what is needed to read it without going back to the catalogue.
       def resources
         @resources ||= extract_resources + supporting_resources
       end

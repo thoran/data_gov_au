@@ -5,6 +5,8 @@ require 'date'
 require 'fileutils'
 require 'json'
 
+require_relative '../../Thoran/Array/NaturalSort/natural_sort'
+
 module DataGovAu
   module ABR
     class Release
@@ -29,6 +31,11 @@ module DataGovAu
 
       def held?(resource)
         resource.held_at?(path_for(resource))
+      end
+
+      # The zips held, read from the directory rather than from the catalogue, so that a release on disk can be parsed without going back to data.gov.au. Sorted by the numbers in their names rather than by their characters, the halves being named public_split_1_10 and public_split_11_20, of which the second sorts first.
+      def zip_paths
+        @zip_paths ||= Dir.glob(File.join(directory, '*.zip')).natural_sort
       end
 
       def missing

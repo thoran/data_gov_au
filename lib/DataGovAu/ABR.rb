@@ -5,8 +5,10 @@
 
 require_relative './ABR/Config'
 require_relative './ABR/Error'
+require_relative './ABR/Extract'
 require_relative './ABR/ExtractDate'
 require_relative './ABR/Fetch'
+require_relative './ABR/Parser'
 require_relative './ABR/Release'
 
 module DataGovAu

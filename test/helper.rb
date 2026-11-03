@@ -114,3 +114,23 @@ def stub_peek(resource, name = EXTRACT_MEMBER)
     with(headers: {'Range' => "bytes=0-#{DataGovAu::ABR::ExtractDate::PEEK_LENGTH - 1}"}).
       to_return(status: 206, body: zip_header(name))
 end
+
+# A release on disk as the fetch leaves one: a directory named for the date the extract carries, holding the fixture zipped under the member names given, so that the parser is exercised through rubyzip rather than over a loose file.
+def release_holding(directory, date, members = {'public_split_1_10.zip' => ['20261020Public01.xml']})
+  release = DataGovAu::ABR::Release.new(config_in(directory), date)
+  release.create_directory
+  members.each do |zip_name, member_names|
+    Zip::File.open(File.join(release.directory, zip_name), create: true) do |zip|
+      member_names.each{|member| zip.add(member, fixture_path('20261020Public01.xml'))}
+    end
+  end
+  release
+end
+
+def fixture_records
+  @fixture_records ||= File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record.to_a}
+end
+
+def fixture_record(abn)
+  fixture_records.detect{|record| record[:abn] == abn}
+end

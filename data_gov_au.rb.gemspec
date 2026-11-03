@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
     Dir['exe/*'],
     Dir['lib/**/*.rb'],
     Dir['test/**/*.rb'],
+    Dir['test/fixtures/*'],
     'CHANGELOG',
     'Gemfile',
     'LICENSE',
@@ -44,6 +45,8 @@ Gem::Specification.new do |spec|
 
   spec.runtime_dependencies = [
     'http.rb',
+    'ox',
+    'rubyzip',
     'switches.rb',
   ]
 
