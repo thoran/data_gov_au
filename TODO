@@ -1,7 +1,6 @@
 # TODO
 
-1. DataGovAu::ABR, the Australian Business Register's weekly ABN bulk extract: its current release found through the catalogue and fetched once, kept in a directory of its own beside the catalogue entry it was found through.
-2. DataGovAu::ABR: the parser, reading every record of a release out of the zips as they lie, so that neither a zip nor an XML file is ever held whole.
-3. DataGovAu::ABR: storage, every record and every name stored with the dates over which it held, nothing filtered and nothing derived at ingest.
-4. DataGovAu::ABR: querying, every criterion a WHERE clause, none of them applied at ingest.
-5. DataGovAu::ABR: output, CSV through dsv, carrying the ABR's attribution.
+1. DataGovAu::ABR: the parser, reading every record of a release out of the zips as they lie, so that neither a zip nor an XML file is ever held whole.
+2. DataGovAu::ABR: storage, every record and every name stored with the dates over which it held, nothing filtered and nothing derived at ingest.
+3. DataGovAu::ABR: querying, every criterion a WHERE clause, none of them applied at ingest.
+4. DataGovAu::ABR: output, CSV through dsv, carrying the ABR's attribution.

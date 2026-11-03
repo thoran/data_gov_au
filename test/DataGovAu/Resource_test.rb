@@ -3,7 +3,7 @@
 require_relative '../helper'
 
 describe DataGovAu::Resource do
-  let(:resource){dataset.resources.last}
+  let(:resource){dataset.resources[1]}
   let(:url){resource.url}
 
   describe "what it reports" do
@@ -59,7 +59,7 @@ describe DataGovAu::Resource do
 
     it "identifies itself as its catalogue does" do
       Dir.mktmpdir do |directory|
-        resource = dataset(DataGovAu::Catalogue.new(user_agent: 'mine/1.0')).resources.last
+        resource = dataset(DataGovAu::Catalogue.new(user_agent: 'mine/1.0')).resources[1]
         stub = stub_request(:get, url).with(headers: {'User-Agent' => 'mine/1.0'}).to_return(status: 200, body: 'x' * 40)
         resource.download(File.join(directory, 'f.zip'))
         assert_requested(stub)

@@ -2,6 +2,18 @@
 
 ## 20261103
 
+0.1.0: Download the current weekly ABR release.
+
+1. + lib/DataGovAu/ABR.rb: + DataGovAu::ABR::ATTRIBUTION, required of any output which leaves the machine, the extract being published under CC BY 3.0 AU.
+2. + lib/DataGovAu/ABR/Config.rb: The settings Fetch and Release share, given as keywords, through setters, or in a block. The API's URL and the user agent default as Catalogue's do. The data directory has no default, and is named as missing where it is first wanted, a release kept anywhere but where it was meant to be being a week lost to those held.
+3. + lib/DataGovAu/ABR/Fetch.rb: The extract's halves are the ZIP resources of abn-bulk-extract, and its other resources the schema, the readme and a list of the resources. Its modified_on reports the latest last_modified among the halves, the other resources being republished on their own schedule. A release whose every file is held is left alone, so a second run in the same week costs one call to the catalogue and one range request.
+4. + lib/DataGovAu/ABR/ExtractDate.rb: A release is dated by the name of the first file inside one of its zips, read from the local file header at the start of it. The catalogue's last_modified dates its own record and moves whenever a resource is touched, so it would name a release holding nothing new; on the release first held the two differ by a day.
+5. + lib/DataGovAu/ABR/Release.rb: A release is a directory named for the date the extract carries, holding the zips under the names data.gov.au serves them, the dataset's other resources, among them the schema and readme needed to read the zips, and the catalogue entry they were all found through.
+6. + lib/DataGovAu/ABR/Error.rb: + DataGovAu::ABR::ExtractUndated.
+7. + exe/data_gov_au: + abr. + -d/--data-directory, -n/--dry-run, -q/--quiet, -h/--help. Its config file is read, and the switches taken over it, a setting left blank or a switch left off leaving what lies beneath it standing. A file which is not a mapping stops the run. The data directory defaults to $XDG_DATA_HOME/data_gov_au. The catalogue's date is reported alongside the extract's own, the two differing.
+8. ~ data_gov_au(.rb).gemspec: + switches.rb, + exe/data_gov_au.
+9. + test/DataGovAu/ABR/Config_test.rb, ExtractDate_test.rb, Fetch_test.rb, Release_test.rb, test/exe/data_gov_au_test.rb. ~ test/helper.rb: The dataset's entry, with its halves, schema and readme. ~ test/DataGovAu/Dataset_test.rb, Resource_test.rb: 75 runs.
+
 0.0.0: A client for data.gov.au's CKAN API: a dataset found by its name or id, its resources described, and a resource downloaded once.
 
 1. + lib/data_gov_au.rb, lib/DataGovAu/VERSION.rb.

@@ -24,8 +24,11 @@ require 'tmpdir'
 require 'webmock/minitest'
 
 require 'data_gov_au'
+require 'DataGovAu/ABR'
 
 PACKAGE_SHOW_URL = "#{DataGovAu::Catalogue::API_URL}/package_show"
+# The extract is dated a day later than the catalogue reports its record modified.
+EXTRACT_MEMBER = '20261028_Public01.xml'
 
 def resource_entry(name, filename, format, last_modified, size)
   {
@@ -49,10 +52,21 @@ def package(resources: nil)
   }
 end
 
+def extract_resource(name, filename, last_modified, size)
+  resource_entry(name, filename, 'ZIP', last_modified, size)
+end
+
+def supporting_resource(name, filename, format, last_modified, size)
+  resource_entry(name, filename, format, last_modified, size)
+end
+
+# The extract's two zipped halves, plus the schema and readme which change on their own schedule.
 def default_resources
   [
-    resource_entry('Bulk Extract Schema', 'bulkextract.xsd', 'XML', '2023-01-19T00:00:00', 12866),
-    resource_entry('ABN Bulk Extract Part 1', 'public_split_1_10.zip', 'ZIP', '2026-10-27T21:39:23.580175', 40),
+    supporting_resource('Bulk Extract Schema', 'bulkextract.xsd', 'XML', '2023-01-19T00:00:00', 12866),
+    extract_resource('ABN Bulk Extract Part 1', 'public_split_1_10.zip', '2026-10-27T21:39:23.580175', 40),
+    extract_resource('ABN Bulk Extract Part 2 ', 'public_split_11_20.zip', '2026-10-27T21:40:59', 40),
+    supporting_resource('Readme', 'abnlookupbulkextractreadme.pdf', 'PDF', '2025-07-02T01:59:12', 30),
   ]
 end
 
@@ -63,4 +77,40 @@ end
 def dataset(catalogue = DataGovAu::Catalogue.new)
   stub_package
   catalogue.dataset('abn-bulk-extract')
+end
+
+def resource_from(entry)
+  DataGovAu::Resource.new(DataGovAu::Catalogue.new, entry)
+end
+
+def fixture_path(name)
+  File.join(__dir__, 'fixtures', name)
+end
+
+def stub_catalogue(body = {'success' => true, 'result' => package}, status: 200)
+  stub_package(DataGovAu::ABR::Fetch::DATASET, body, status: status)
+end
+
+def stub_downloads(resources)
+  resources.each{|resource| stub_request(:get, resource['url']).to_return(status: 200, body: 'x' * resource['size'])}
+end
+
+def config_in(directory, **settings)
+  DataGovAu::ABR::Config.new(data_directory: directory, **settings)
+end
+
+# The start of a zip: its first local file header, which is enough to name the first file inside. A signature, twenty-two bytes which do not matter here, the name's length, the extra field's length, and the name.
+def zip_header(name, declared_length: nil)
+  "PK\x03\x04".b + ("\x00".b * 22) + [declared_length || name.bytesize].pack('v') + ("\x00".b * 2) + name.b
+end
+
+def first_extract_resource(resources = default_resources)
+  resources.select{|resource| resource['format'] == 'ZIP'}.sort_by{|resource| resource['name'].to_s}.first
+end
+
+# The range request by which a release is named, answered as data.gov.au answers it: 206, and the first bytes alone. Registered after any whole-body stub for the same resource, webmock preferring the stub registered last.
+def stub_peek(resource, name = EXTRACT_MEMBER)
+  stub_request(:get, resource['url']).
+    with(headers: {'Range' => "bytes=0-#{DataGovAu::ABR::ExtractDate::PEEK_LENGTH - 1}"}).
+      to_return(status: 206, body: zip_header(name))
 end

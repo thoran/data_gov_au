@@ -1,0 +1,134 @@
+#!/usr/bin/env ruby
+# data_gov_au
+
+# 20261103
+# 0.1.0
+
+require 'switches.rb'
+require 'yaml'
+
+require_relative '../lib/data_gov_au'
+require_relative '../lib/DataGovAu/ABR'
+
+BYTES_PER_KILOBYTE = 1024
+BYTES_PER_MEGABYTE = 1_048_576
+CONFIG_PATH = '~/.config/data_gov_au/config.yaml'
+DATASETS = ['abr']
+SETTINGS = [:api_url, :data_directory, :user_agent]
+
+def usage
+  puts "data_gov_au - datasets published on data.gov.au: fetch, store and query."
+  puts
+  puts "Usage: data_gov_au DATASET [options]"
+  puts
+  puts "Datasets:"
+  puts "  abr                       The Australian Business Register's weekly ABN bulk extract"
+  puts
+  puts "Options:"
+  puts "  -d, --data-directory DIR  Where every dataset is kept (default: $XDG_DATA_HOME/data_gov_au)"
+  puts "  -n, --dry-run             Report what would be retrieved without retrieving it"
+  puts "  -q, --quiet               Report nothing but errors"
+  puts "  -h, --help                Show this help"
+end
+
+def switches
+  @switches ||= Switches.new do |s|
+    s.optional(:d, :data_directory){'Where every dataset is kept (default: $XDG_DATA_HOME/data_gov_au)'}
+    s.boolean(:n, :dry_run){'Report what would be retrieved without retrieving it'}
+    s.boolean(:q, :quiet){'Report nothing but errors'}
+    s.perform(:h, :help?) do
+      usage
+      exit
+    end
+  end
+end
+
+# What is left once the switches are read, OptionParser taking them out of ARGV wherever they stood.
+def dataset
+  @dataset ||= ARGV.first
+end
+
+def default_data_directory
+  data_home = ENV['XDG_DATA_HOME'].to_s
+  File.join(data_home.empty? ? File.join('~', '.local', 'share') : data_home, 'data_gov_au')
+end
+
+def config_path
+  @config_path ||= File.expand_path(CONFIG_PATH)
+end
+
+def stored_settings
+  @stored_settings ||= File.exist?(config_path) ? read_settings : {}
+end
+
+# A file which is not a mapping stops the run rather than leaving it on the defaults, which would hide a typo in the one place the machine's own settings live.
+def read_settings
+  settings = YAML.safe_load_file(config_path) || {}
+  report_failure("#{config_path} does not hold a mapping") unless settings.is_a?(Hash)
+  settings.transform_keys(&:to_sym)
+end
+
+def switched_settings
+  {data_directory: switches.data_directory}
+end
+
+# A setting left blank or a switch left off is nil, and leaves what lies beneath it standing.
+def settings
+  @settings ||= {data_directory: default_data_directory}.merge(stored_settings.compact, switched_settings.compact).slice(*SETTINGS)
+end
+
+def config
+  @config ||= DataGovAu::ABR::Config.new(**settings)
+end
+
+def fetch
+  @fetch ||= DataGovAu::ABR::Fetch.new(config)
+end
+
+def report(message)
+  puts message unless switches.quiet?
+end
+
+def reported_size(size)
+  return 'size unknown' if size.nil?
+  return "#{(size.to_f / BYTES_PER_MEGABYTE).round} MB" if size >= BYTES_PER_MEGABYTE
+  "#{(size.to_f / BYTES_PER_KILOBYTE).round} kB"
+end
+
+def describe(resource)
+  "  #{resource.filename} (#{reported_size(resource.size)})"
+end
+
+def report_release
+  report("release:   #{fetch.release}")
+  report("catalogue: #{fetch.modified_on.strftime('%Y%m%d')}")
+  report("licence:   #{fetch.dataset.licence}")
+  report("held:      #{fetch.resources.length - fetch.release.missing.length} of #{fetch.resources.length} files")
+  fetch.release.missing.each{|resource| report(describe(resource))}
+end
+
+def retrieve_release
+  report(fetch.release.complete? ? 'nothing to retrieve' : "retrieving into #{fetch.release.directory}")
+  fetch.perform{|resource| report("  #{resource.filename}")}
+end
+
+def report_failure(message)
+  $stderr.puts "data_gov_au: #{message}"
+  exit 1
+end
+
+def check_dataset
+  return if DATASETS.include?(dataset)
+  report_failure("#{dataset ? "#{dataset} is not a dataset" : 'no dataset named'}; one of #{DATASETS.join(', ')}")
+end
+
+def main
+  switches
+  check_dataset
+  report_release
+  retrieve_release unless switches.dry_run?
+rescue DataGovAu::Error => error
+  report_failure(error.message)
+end
+
+main

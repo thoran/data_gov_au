@@ -16,7 +16,7 @@ describe DataGovAu::Dataset do
   end
 
   it "gives its resources in the catalogue's order" do
-    _(dataset.resources.collect(&:filename)).must_equal ['bulkextract.xsd', 'public_split_1_10.zip']
+    _(dataset.resources.collect(&:filename)).must_equal ['bulkextract.xsd', 'public_split_1_10.zip', 'public_split_11_20.zip', 'abnlookupbulkextractreadme.pdf']
   end
 
   it "gives no resources where the catalogue lists none" do
