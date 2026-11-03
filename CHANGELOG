@@ -1,0 +1,13 @@
+# data_gov_au/CHANGELOG
+
+## 20261103
+
+0.0.0: A client for data.gov.au's CKAN API: a dataset found by its name or id, its resources described, and a resource downloaded once.
+
+1. + lib/data_gov_au.rb, lib/DataGovAu/VERSION.rb.
+2. + data_gov_au.gemspec, data_gov_au.rb.gemspec: The same gem, published under both names.
+3. + lib/DataGovAu/Catalogue.rb: + dataset(), through package_show. The user agent and the API's URL are arguments with defaults rather than settings read from a file, a library having no machine of its own to configure. Either can also be set once it is made, or in a block.
+4. + lib/DataGovAu/Dataset.rb: + name, title, organisation, licence, modified_at, resources, to_h. CKAN gives its times without a zone, and they are read as UTC.
+5. + lib/DataGovAu/Resource.rb: + download(), written to a .partial file and renamed into place once whole, so that an interrupted download leaves nothing which would pass for the file, and stopping upon a body other than the length the catalogue reports. + first_bytes(), which asks by range and stops upon anything but 206, holding the whole body being what asking by range is meant to avoid. + held_at?(). + filename, taken from the URL, the resource's own name being prose.
+6. + lib/DataGovAu/Error.rb: + DataGovAu::Error, CatalogueUnavailable, DownloadFailed.
+7. + test/DataGovAu/Catalogue_test.rb, Dataset_test.rb, Resource_test.rb: 32 runs.
