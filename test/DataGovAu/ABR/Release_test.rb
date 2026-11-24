@@ -73,6 +73,42 @@ describe DataGovAu::ABR::Release do
     end
   end
 
+  describe "whether it is held whole" do
+    it "is where every zip its recorded catalogue entry lists is present at its length" do
+      Dir.mktmpdir do |directory|
+        _(whole_release(directory, Date.new(2026, 10, 28), older_files).whole?).must_equal true
+      end
+    end
+
+    it "is not where a zip is short" do
+      Dir.mktmpdir do |directory|
+        release = whole_release(directory, Date.new(2026, 10, 28), older_files)
+        File.truncate(File.join(release.directory, 'public_split_1_10.zip'), 10)
+        _(release.whole?).must_equal false
+      end
+    end
+
+    it "is not where no catalogue entry is recorded" do
+      Dir.mktmpdir do |directory|
+        release = whole_release(directory, Date.new(2026, 10, 28), older_files)
+        File.delete(release.catalogue_path)
+        _(release.whole?).must_equal false
+      end
+    end
+  end
+
+  describe "whether it has its delta" do
+    it "has not where only one of the delta and frame is present" do
+      Dir.mktmpdir do |directory|
+        release = whole_release(directory, Date.new(2026, 10, 28), older_files)
+        File.write(release.delta_path, '')
+        _(release.delta?).must_equal false
+        File.write(release.frame_path, '')
+        _(release.delta?).must_equal true
+      end
+    end
+  end
+
   describe "the releases already on disk" do
     it "reports none where nothing has been retrieved" do
       Dir.mktmpdir do |directory|

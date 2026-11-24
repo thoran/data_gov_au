@@ -1,5 +1,27 @@
 # data_gov_au/CHANGELOG
 
+## 20261124
+
+0.3.0: Each release is kept beside its zips as its changes from the one before.
+
+1. + lib/DataGovAu/ABR/Lines.rb: An XML file read as text: its records a line each, the bytes before the first and after the last, whatever other than a line break parts two records, and the SHA-256 of every byte read. A record running over more than one line stops it.
+2. + lib/DataGovAu/ABR/Delta.rb: A release's changes, in ABN order: A and the record for an ABN added, C and the record for one changed, R and the ABN for one removed. Whole records rather than byte-level patches, which over 20261028 and 20261104 came to about five times the size once compressed, under git and under zstd --patch-from alike.
+3. + lib/DataGovAu/ABR/Frame.rb: Everything in a release outside its records, file by file, with each file's record count and SHA-256. The gaps' positions are held as the distances between them, the extract putting a second carriage return after every hundredth record.
+4. + lib/DataGovAu/ABR/CompressedFile.rb: Lines streamed through zstd at level 19. zstd-ruby's StreamWriter flushes at every write, ending a block each time.
+5. + lib/DataGovAu/ABR/Rebuild.rb: A release written out again from the one before it, its delta and its frame. + check(), which sets each file rebuilt against the frame's hash.
+6. + lib/DataGovAu/ABR/Comparison.rb: + perform(), which writes the newer release's delta and frame under partial names, rebuilds the release from them, and names them only once it comes out exactly. + Comparison.pending(), the releases held whole which want comparing, oldest first, each set against the newest one before it held whole, so that a week missed or held only in part is compared across.
+7. ~ lib/DataGovAu/ABR/Extract.rb: + each_member(), + each_record_line(), which stops where the ABNs do not rise.
+8. ~ lib/DataGovAu/ABR/Release.rb: + whole?(), read from the recorded catalogue entry rather than from the directory, so that a zip cut short does not pass. + delta?(), + delta_path(), + frame_path(), + recorded_resources(), + EXTRACT_FORMAT.
+9. ~ lib/DataGovAu/ABR/Fetch.rb: Its EXTRACT_FORMAT is Release's.
+10. ~ lib/DataGovAu/ABR/Error.rb: + ExtractMalformed, + RebuildMismatch.
+11. - exe/data_gov_au, test/exe/data_gov_au_test.rb: A command line is a program of its own, reading its own settings and passing them in.
+12. ~ data_gov_au(.rb).gemspec: + zstd-ruby, at 1.5.6.2 or later, the first to take the compression level as a keyword. - switches.rb, - exe/data_gov_au.
+13. + test/DataGovAu/ABR/CompressedFile_test.rb, Comparison_test.rb, Delta_test.rb, Frame_test.rb, Lines_test.rb, Rebuild_test.rb. ~ test/DataGovAu/ABR/Extract_test.rb, Release_test.rb: The files read as text, and whether a release is held whole and has its delta, are tested. ~ test/helper.rb: + record_line(), member_text(), abns(), whole_release(), older_files(), newer_files(), two_releases(): 168 runs.
+14. ~ README.md: Releases land on Tuesdays, not Mondays. - The command, - Configuration, - From Ruby. + Settings, + Fetching, + Parsing, in the library's terms. + Releases kept as differences.
+15. ~ ROADMAP.md: Releases land on Tuesdays around 21:39 UTC. - The command, + The stages. + Releases kept as differences. Its undecided items are in PROPOSED.md, which its opening names.
+16. + PROPOSED.md: What is still undecided, under ROADMAP.md's headings.
+17. ~ TODO: + The rebuild through the whole chain, checked against hashes its caller gives. + The zips' removal, on the caller's asking.
+
 ## 20261103
 
 0.2.0: + DataGovAu::ABR::Parser, DataGovAu::ABR::Extract: Records are read directly from a downloaded release's zips.

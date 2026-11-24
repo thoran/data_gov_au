@@ -71,7 +71,7 @@ Everything raised is a `DataGovAu::Error`: `CatalogueUnavailable` where the cata
 
 ## The ABN Bulk Extract
 
-`DataGovAu::ABR`, built on the catalogue, holds the Australian Business Register's weekly bulk extract: a snapshot of the public ABN register, two zip files of around 477 MB each, holding twenty XML files and some 12 GB uncompressed. It fetches each release, keeps it, and reads its records.
+`DataGovAu::ABR`, built on the catalogue, holds the Australian Business Register's weekly bulk extract: a snapshot of the public ABN register, two zip files of around 477 MB each, holding twenty XML files and some 12 GB uncompressed. It fetches each release, reads its records, and keeps each release after the first as its changes from the one before.
 
 ```ruby
 require 'DataGovAu/ABR'
@@ -84,100 +84,42 @@ Its parts, in the order a release passes through them:
 - `ExtractDate`: the date the extract carries, read from the first bytes of a zip.
 - `Release`: a release on disk, its directory named for that date.
 - `Extract` and `Parser`: a release's records, read out of its zips.
+- `Comparison`: a release set against the one before it, through `Lines`, `Delta`, `Frame`, `CompressedFile` and `Rebuild`.
 
 ### Why a local copy
 
-The extract is a snapshot of current state. Nothing in it says an ABN is new; that word only exists once you have two snapshots and can see the difference. data.gov.au publishes the current release alone and overwrites it in place each Monday, so a release not kept is not recoverable. The earliest baseline you can ever have is the first one you capture, which is why nothing is discarded.
+The extract is a snapshot of current state. Nothing in it says an ABN is new; that word only exists once you have two snapshots and can see the difference. data.gov.au publishes the current release alone and overwrites it in place each Tuesday, so a release not kept is not recoverable. The earliest baseline you can ever have is the first one you capture, which is why nothing is discarded.
 
-### The command
+### Settings
 
-```shell
-$ data_gov_au abr
-```
-
-Fetches the current release if it is not already held. A second run in the same week makes one call to the catalogue and no download. That makes it the thing to run each week from a scheduler, a week not fetched being gone for good.
-
-```
-release:   20261028
-catalogue: 20261027
-licence:   Creative Commons Attribution 3.0 Australia
-held:      0 of 5 files
-  public_split_1_10.zip (477 MB)
-  public_split_11_20.zip (477 MB)
-  bulkextract.xsd (13 kB)
-  abnlookupbulkextractreadme.pdf (150 kB)
-  abn-bulk-extract-resources.csv (1 kB)
-```
-
-Two dates are reported because they differ. A release is named for the date the extract carries itself, read from the names of the files inside its zips; the catalogue's own date is when data.gov.au last touched its record, which moves whether or not the data did. Reading the first is cheap: the name of the first file inside a zip sits in the first few hundred bytes, so it is asked for by range before anything large is retrieved.
-
-#### Parsing
-
-```shell
-$ data_gov_au abr --parse
-```
-
-Reads every record of the newest release held, touching nothing on the network. Each file is set against the count it carries itself, so a file which gave up fewer records than it promised is reported rather than passing for a smaller week. So is a file which reports an error, in the `error` attribute the schema requires of each, which is `none` in a file written out whole.
-
-```
-release:   20261028
-  20261028_Public01.xml  1032000 of 1032000
-  ...
-  20261028_Public20.xml  1023294 of 1023294
-total:     20631294 records in 5 m 48 s
-```
-
-#### Options
-
-```
-  -d, --data-directory DIR  Where every dataset is kept (default: $XDG_DATA_HOME/data_gov_au)
-  -n, --dry-run             Report what would be retrieved without retrieving it
-  -p, --parse               Parse the newest release held, retrieving nothing
-  -q, --quiet               Report nothing but errors
-  -h, --help                Show this help
-```
-
-### Configuration
-
-The command reads `~/.config/data_gov_au/config.yaml`, where present, and its switches override that. A switch left off, or a setting left blank, leaves what lies beneath it standing; a file which is not a mapping stops the command. The data directory is `$XDG_DATA_HOME/data_gov_au` unless set, or `~/.local/share/data_gov_au` where `XDG_DATA_HOME` is unset.
-
-```yaml
-data_directory: /srv/data_gov_au
-user_agent: data_gov_au/0.2.0
-```
-
-The library reads no file. `DataGovAu::ABR::Config` takes `data_directory:`, `api_url:` and `user_agent:` as keywords or through its setters, and yields itself to a block. The API's URL and the user agent default as the catalogue's do. The data directory has no default, and is named as missing where it is first wanted.
+`DataGovAu::ABR::Config` holds what the rest share: `data_directory:`, `api_url:` and `user_agent:`, taken as keywords or through its setters, and it yields itself to a block. The API's URL and the user agent default as the catalogue's do. The data directory has no default, and is named as missing where it is first wanted, a release kept anywhere but where it was meant to be being a week lost to those held.
 
 ```ruby
 config = DataGovAu::ABR::Config.new(data_directory: '/srv/data_gov_au')
 config = DataGovAu::ABR::Config.new{|c| c.data_directory = '/srv/data_gov_au'}
 ```
 
-### On disk
+The library reads no file: where the settings are kept is for the program using it.
 
-```
-~/.local/share/data_gov_au/
-  abr/
-    releases/
-      20261028/
-        public_split_1_10.zip
-        public_split_11_20.zip
-        bulkextract.xsd
-        abnlookupbulkextractreadme.pdf
-        abn-bulk-extract-resources.csv
-        catalogue.json
-```
-
-Each release directory is self-describing: the data, the schema and readme needed to read it, and the catalogue entry it was found through — where it came from, when, and under what licence. A parser corrected later can be run again over the releases it first got wrong, which is only possible while the releases are still held.
-
-### From Ruby
-
-What the command does, the library does: fetching the current release, and reading the records of one held.
+### Fetching
 
 ```ruby
-config = DataGovAu::ABR::Config.new(data_directory: '/srv/data_gov_au')
-release = DataGovAu::ABR::Fetch.new(config).perform{|resource| puts resource.filename}
+fetch = DataGovAu::ABR::Fetch.new(config)
 
+fetch.release.to_s                     # => "20261028"
+fetch.modified_on.strftime('%Y%m%d')   # => "20261027"
+fetch.release.missing                  # => the resources not yet held
+
+release = fetch.perform{|resource| puts resource.filename}
+```
+
+Fetches the current release, retrieving whatever of it is not already held. A second fetch in the same week makes one call to the catalogue and one range request, and retrieves nothing, so it can be run each week from a scheduler, a week not fetched being gone for good.
+
+Two dates are given because they differ. A release is named for the date the extract carries itself, `released_on`, read from the names of the files inside its zips; the catalogue's own date, `modified_on`, is when data.gov.au last touched its record, which moves whether or not the data did. Reading the first is cheap: the name of the first file inside a zip sits in the first few hundred bytes, so it is asked for by range before anything large is retrieved.
+
+### Parsing
+
+```ruby
 DataGovAu::ABR::Extract.new(release).each_record do |record|
   record[:abn]          # => "11000047950"
 end
@@ -192,6 +134,58 @@ release = DataGovAu::ABR::Release.new(config, date)
 DataGovAu::ABR::Extract.new(release).each_file do |name, parser|
   parser.each_record{|record| record[:names]}
   parser.whole?         # => true, where the file reports no error and gave up as many records as it promised
+end
+```
+
+Reading touches nothing on the network. `whole?` sets a file against the count it carries itself, so that a file which gave up fewer records than it promised is not taken for a smaller week. Nor is a file which reports an error, in the `error` attribute the schema requires of each, which is `none` in a file written out whole.
+
+### On disk
+
+```
+/srv/data_gov_au/
+  abr/
+    releases/
+      20261028/
+        public_split_1_10.zip
+        public_split_11_20.zip
+        bulkextract.xsd
+        abnlookupbulkextractreadme.pdf
+        abn-bulk-extract-resources.csv
+        catalogue.json
+      20261104/
+        ...
+        delta.zst
+        frame.json.zst
+```
+
+Each release directory is self-describing: the data, the schema and readme needed to read it, and the catalogue entry it was found through — where it came from, when, and under what licence. A parser corrected later can be run again over the releases it first got wrong, which is only possible while the releases are still held.
+
+### Releases kept as differences
+
+Each release after the first is kept beside its zips as its changes from the release before it, so that the zips can later go and the release still be had back exactly.
+
+- `delta.zst`: a line for each ABN which changed, in ABN order. `A` and the record for an ABN added, `C` and the record for one changed, `R` and the ABN for one removed. The records stand as the extract writes them, so the week's new ABNs, cancellations and reactivations can be read from the delta alone. 20261104's is 2.0 MB.
+- `frame.json.zst`: everything outside the records, file by file. Each file's name, the bytes before its first record and after its last, how many records it holds, what parts two records wherever that is other than a line break (the extract puts a second carriage return after every hundredth), and the SHA-256 of the whole file. 1.4 kB.
+
+Both are zstd at level 19, and `zstd -d` reads them.
+
+A delta is trusted only once it has given its release back. Both files are written under partial names; the release is rebuilt from the one before it and them, file by file; and only where every file comes out at the hash taken as it was first read are the two given their own names. A comparison which stops leaves neither behind.
+
+`Comparison.pending` is every release held whole which has no delta yet, each set against the newest release before it held whole, oldest first, so that weeks gone uncompared are caught up in order, and a week missed or held only in part is compared across. Over 20261028 and 20261104 it found 15,146 ABNs added, 47,985 changed and 11 removed, and wrote the delta and rebuilt the release from it in 7 minutes.
+
+Nothing is removed. The zips stay as they were fetched; their removal is to come, on the caller's asking, and refused for a release which does not rebuild exactly through the whole chain.
+
+A release can be kept so while the extract is laid out a record a line, as it is now, each record carrying its ABN and the ABNs rising throughout. The files were once written with records running over many lines. Were they again, the comparison would stop with `DataGovAu::ABR::ExtractMalformed`, and the release would stay whole.
+
+```ruby
+config = DataGovAu::ABR::Config.new(data_directory: '/srv/data_gov_au')
+DataGovAu::ABR::Comparison.pending(config).each(&:perform)
+
+release = DataGovAu::ABR::Release.new(config, Date.new(2026, 11, 4))
+DataGovAu::ABR::Delta.new(release.delta_path).each_change do |change|
+  change.kind     # => "A", "C" or "R"
+  change.abn      # => "11000047950"
+  change.record   # => the record as the extract holds it, or nil where the ABN was removed
 end
 ```
 
@@ -272,7 +266,7 @@ nokogiri sax     12 m 32 s    16.1 MB/s
 
 Both gave up 20,631,294 records. Inflating the zip and building the records are in that path too, so the gap closes from three to five times down to about twice: 1.7 times here, 1.9 on a single file measured back to back. Twice is worth having weekly; five times was never on offer.
 
-Those are both slower than the figure the tool itself reports, which is the same Ox work at 5 m 48 s. The spread between 5 m 48 s and 7 m 34 s is run to run, these being runs bound by reading a gigabyte off disk and by the garbage collector rather than by the parser. So: six to eight minutes for a release, and about half what Nokogiri would take.
+Those are both slower than the same Ox work timed through `each_file`, at 5 m 48 s. The spread between 5 m 48 s and 7 m 34 s is run to run, these being runs bound by reading a gigabyte off disk and by the garbage collector rather than by the parser. So: six to eight minutes for a release, and about half what Nokogiri would take.
 
 The cost of Ox is memory, which it spends to go faster: over one file it finished holding 195 MB against Nokogiri's 115 MB.
 

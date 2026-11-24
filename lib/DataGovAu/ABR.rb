@@ -3,12 +3,18 @@
 
 # Description: The Australian Business Register's weekly bulk extract: fetched from data.gov.au, stored locally, and queried for businesses which have newly appeared.
 
+require_relative './ABR/Comparison'
+require_relative './ABR/CompressedFile'
 require_relative './ABR/Config'
+require_relative './ABR/Delta'
 require_relative './ABR/Error'
 require_relative './ABR/Extract'
 require_relative './ABR/ExtractDate'
 require_relative './ABR/Fetch'
+require_relative './ABR/Frame'
+require_relative './ABR/Lines'
 require_relative './ABR/Parser'
+require_relative './ABR/Rebuild'
 require_relative './ABR/Release'
 
 module DataGovAu

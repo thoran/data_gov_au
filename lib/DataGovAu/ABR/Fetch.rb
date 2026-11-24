@@ -11,7 +11,7 @@ module DataGovAu
   module ABR
     class Fetch
       DATASET = 'abn-bulk-extract'
-      EXTRACT_FORMAT = 'ZIP'
+      EXTRACT_FORMAT = Release::EXTRACT_FORMAT
 
       def catalogue
         @catalogue ||= Catalogue.new(api_url: @config.api_url, user_agent: @config.user_agent)

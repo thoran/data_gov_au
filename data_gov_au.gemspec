@@ -26,12 +26,9 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.2'
   spec.require_paths = ['lib']
-  spec.bindir = 'exe'
-  spec.executables = ['data_gov_au']
 
   spec.files = [
     'data_gov_au.gemspec',
-    Dir['exe/*'],
     Dir['lib/**/*.rb'],
     Dir['test/**/*.rb'],
     Dir['test/fixtures/*'],
@@ -47,7 +44,7 @@ Gem::Specification.new do |spec|
     'http.rb',
     'ox',
     'rubyzip',
-    'switches.rb',
+    ['zstd-ruby', '>= 1.5.6.2'],
   ]
 
   spec.development_dependencies = [

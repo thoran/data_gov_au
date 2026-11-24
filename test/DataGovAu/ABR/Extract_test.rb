@@ -22,6 +22,14 @@ describe DataGovAu::ABR::Extract do
       end
     end
 
+    it "yields each file as its name and the text inflated" do
+      Dir.mktmpdir do |directory|
+        release = whole_release(directory, Date.new(2026, 10, 28), older_files)
+        members = DataGovAu::ABR::Extract.new(release).each_member.collect{|name, io| [name, io.read]}
+        _(members).must_equal older_files.values.inject(:merge).to_a
+      end
+    end
+
     it "reads across both zips of a release" do
       Dir.mktmpdir do |directory|
         release = release_holding(directory, Date.new(2026, 10, 28), {

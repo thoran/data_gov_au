@@ -5,12 +5,16 @@ require 'date'
 require 'fileutils'
 require 'json'
 
+require_relative '../Resource'
 require_relative '../../Thoran/Array/NaturalSort/natural_sort'
 
 module DataGovAu
   module ABR
     class Release
       DATE_FORMAT = '%Y%m%d'
+      DELTA_NAME = 'delta.zst'
+      EXTRACT_FORMAT = 'ZIP'
+      FRAME_NAME = 'frame.json.zst'
 
       # The release dates already on disk, newest first, read from the directory names rather than from the database, so that what is held can be reported before anything has been loaded.
       def self.dates_held(config)
@@ -59,6 +63,33 @@ module DataGovAu
 
       def catalogue_path
         @catalogue_path ||= File.join(directory, 'catalogue.json')
+      end
+
+      # The resources of the catalogue entry recorded beside the files, which say what a release on disk should hold and at what lengths without going back to data.gov.au. Read afresh each time, the entry being written partway through a fetch.
+      def recorded_resources
+        return [] unless File.exist?(catalogue_path)
+        JSON.parse(File.read(catalogue_path)).fetch('resources', []).collect{|entry| Resource.new(nil, entry)}
+      end
+
+      # Every zip the recorded catalogue entry lists is present, at the length it gives.
+      def whole?
+        zips = recorded_resources.select{|resource| resource.format == EXTRACT_FORMAT}
+        !zips.empty? && zips.all?{|resource| held?(resource)}
+      end
+
+      # Its changes from the release before it.
+      def delta_path
+        @delta_path ||= File.join(directory, DELTA_NAME)
+      end
+
+      # What lies outside its records, and the hash of each of its files.
+      def frame_path
+        @frame_path ||= File.join(directory, FRAME_NAME)
+      end
+
+      # Both are given their names only once they have rebuilt the release exactly, so both being present means a delta which has been checked.
+      def delta?
+        File.exist?(delta_path) && File.exist?(frame_path)
       end
 
       def to_s
