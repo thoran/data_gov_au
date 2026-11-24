@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Release.rb
-# DataGovAu::ABR::Release
+# DataGovAu/AbnBulkExtract/Release.rb
+# DataGovAu::AbnBulkExtract::Release
 
 require 'date'
 require 'fileutils'
@@ -9,7 +9,7 @@ require_relative '../Resource'
 require_relative '../../Thoran/Array/NaturalSort/natural_sort'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     class Release
       DATE_FORMAT = '%Y%m%d'
       DELTA_NAME = 'delta.zst'

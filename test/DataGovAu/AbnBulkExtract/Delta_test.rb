@@ -1,10 +1,10 @@
-# test/DataGovAu/ABR/Delta_test.rb
+# test/DataGovAu/AbnBulkExtract/Delta_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Delta do
+describe DataGovAu::AbnBulkExtract::Delta do
   def written(directory)
-    delta = DataGovAu::ABR::Delta.new(File.join(directory, 'delta.zst'))
+    delta = DataGovAu::AbnBulkExtract::Delta.new(File.join(directory, 'delta.zst'))
     delta.write do |changes|
       changes.change(record_line('22222222222', status: 'CAN'))
       changes.add(record_line('25000000000'))
@@ -34,8 +34,8 @@ describe DataGovAu::ABR::Delta do
   it "stops at a line which is no change" do
     Dir.mktmpdir do |directory|
       path = File.join(directory, 'delta.zst')
-      DataGovAu::ABR::CompressedFile.new(path).write{|file| file << "X 11111111111\n"}
-      _(->{DataGovAu::ABR::Delta.new(path).each_change.to_a}).must_raise DataGovAu::ABR::ExtractMalformed
+      DataGovAu::AbnBulkExtract::CompressedFile.new(path).write{|file| file << "X 11111111111\n"}
+      _(->{DataGovAu::AbnBulkExtract::Delta.new(path).each_change.to_a}).must_raise DataGovAu::AbnBulkExtract::ExtractMalformed
     end
   end
 end

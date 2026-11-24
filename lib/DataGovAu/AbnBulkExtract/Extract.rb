@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Extract.rb
-# DataGovAu::ABR::Extract
+# DataGovAu/AbnBulkExtract/Extract.rb
+# DataGovAu::AbnBulkExtract::Extract
 
 require 'zip'
 
@@ -9,7 +9,7 @@ require_relative './Parser'
 require_relative '../../Thoran/String/NaturalComparison/natural_comparison'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A release's records, read out of the zips as they lie. rubyzip inflates a member as it is read and Ox is handed that stream, so neither a 477 MB zip nor one of the 605 MB XML files inside it is ever held whole.
     class Extract
       # Each XML file of the release in turn, as its name and the stream rubyzip inflates.

@@ -1,12 +1,12 @@
-# DataGovAu/ABR/Delta.rb
-# DataGovAu::ABR::Delta
+# DataGovAu/AbnBulkExtract/Delta.rb
+# DataGovAu::AbnBulkExtract::Delta
 
 require_relative './CompressedFile'
 require_relative './Error'
 require_relative './Lines'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A release's changes from the release before it, a line for each ABN which changed, in ABN order: A and the record for an ABN added, C and the record for one changed, R and the ABN for one removed. A record unchanged from one week to the next, which nearly every one is, is not held. The changes being whole records, the week's new ABNs, cancellations and reactivations can be read from the delta alone.
     class Delta
       ADDED = 'A'

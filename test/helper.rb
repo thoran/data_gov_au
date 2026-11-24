@@ -24,7 +24,7 @@ require 'tmpdir'
 require 'webmock/minitest'
 
 require 'data_gov_au'
-require 'DataGovAu/ABR'
+require 'DataGovAu/AbnBulkExtract'
 
 PACKAGE_SHOW_URL = "#{DataGovAu::Catalogue::API_URL}/package_show"
 # The extract is dated a day later than the catalogue reports its record modified.
@@ -88,7 +88,7 @@ def fixture_path(name)
 end
 
 def stub_catalogue(body = {'success' => true, 'result' => package}, status: 200)
-  stub_package(DataGovAu::ABR::Fetch::DATASET, body, status: status)
+  stub_package(DataGovAu::AbnBulkExtract::DATASET, body, status: status)
 end
 
 def stub_downloads(resources)
@@ -96,7 +96,7 @@ def stub_downloads(resources)
 end
 
 def config_in(directory, **settings)
-  DataGovAu::ABR::Config.new(data_directory: directory, **settings)
+  DataGovAu::AbnBulkExtract::Config.new(directory: directory, **settings)
 end
 
 # The start of a zip: its first local file header, which is enough to name the first file inside. A signature, twenty-two bytes which do not matter here, the name's length, the extra field's length, and the name.
@@ -111,13 +111,13 @@ end
 # The range request by which a release is named, answered as data.gov.au answers it: 206, and the first bytes alone. Registered after any whole-body stub for the same resource, webmock preferring the stub registered last.
 def stub_peek(resource, name = EXTRACT_MEMBER)
   stub_request(:get, resource['url']).
-    with(headers: {'Range' => "bytes=0-#{DataGovAu::ABR::ExtractDate::PEEK_LENGTH - 1}"}).
+    with(headers: {'Range' => "bytes=0-#{DataGovAu::AbnBulkExtract::ExtractDate::PEEK_LENGTH - 1}"}).
       to_return(status: 206, body: zip_header(name))
 end
 
 # A release on disk as the fetch leaves one: a directory named for the date the extract carries, holding the fixture zipped under the member names given, so that the parser is exercised through rubyzip rather than over a loose file.
 def release_holding(directory, date, members = {'public_split_1_10.zip' => ['20261020Public01.xml']})
-  release = DataGovAu::ABR::Release.new(config_in(directory), date)
+  release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), date)
   release.create_directory
   members.each do |zip_name, member_names|
     Zip::File.open(File.join(release.directory, zip_name), create: true) do |zip|
@@ -128,7 +128,7 @@ def release_holding(directory, date, members = {'public_split_1_10.zip' => ['202
 end
 
 def fixture_records
-  @fixture_records ||= File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record.to_a}
+  @fixture_records ||= File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record.to_a}
 end
 
 def fixture_record(abn)
@@ -154,7 +154,7 @@ end
 
 # A release held whole as the fetch leaves one: its zips, each holding the files given as name and text, and the catalogue entry they were found through, listing each zip at the length written.
 def whole_release(directory, date, zips)
-  release = DataGovAu::ABR::Release.new(config_in(directory), date)
+  release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), date)
   release.create_directory
   zips.each do |zip_name, files|
     Zip::File.open(File.join(release.directory, zip_name), create: true) do |zip|

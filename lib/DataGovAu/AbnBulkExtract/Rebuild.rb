@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Rebuild.rb
-# DataGovAu::ABR::Rebuild
+# DataGovAu/AbnBulkExtract/Rebuild.rb
+# DataGovAu::AbnBulkExtract::Rebuild
 
 require 'digest'
 
@@ -9,7 +9,7 @@ require_relative './Extract'
 require_relative './Lines'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A release written out again from the release before it, held whole, and its delta and frame: the older release's records with the delta laid over them, cut into files at the counts the frame gives, and each file put back between the bytes the frame holds for it.
     class Rebuild
       # Each file of the rebuilt release as a run of pieces, every one given with the frame's member it belongs to: what comes before the file's first record, its records with what parts each from the next, and what follows its last.

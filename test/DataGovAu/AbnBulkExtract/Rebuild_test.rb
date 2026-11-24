@@ -1,18 +1,18 @@
-# test/DataGovAu/ABR/Rebuild_test.rb
+# test/DataGovAu/AbnBulkExtract/Rebuild_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Rebuild do
+describe DataGovAu::AbnBulkExtract::Rebuild do
   # The delta and frame as a comparison writes them, before they are checked, so that each test can spoil one or the other.
   def compared(directory)
     older, newer = two_releases(directory)
-    comparison = DataGovAu::ABR::Comparison.new(older, newer)
+    comparison = DataGovAu::AbnBulkExtract::Comparison.new(older, newer)
     comparison.write
     [older, newer, "#{newer.delta_path}.partial", "#{newer.frame_path}.partial"]
   end
 
   def rebuild(older, delta_path, frame_path)
-    DataGovAu::ABR::Rebuild.new(older, DataGovAu::ABR::Delta.new(delta_path), DataGovAu::ABR::Frame.read(frame_path))
+    DataGovAu::AbnBulkExtract::Rebuild.new(older, DataGovAu::AbnBulkExtract::Delta.new(delta_path), DataGovAu::AbnBulkExtract::Frame.read(frame_path))
   end
 
   def rebuilt_files(rebuild)
@@ -37,7 +37,7 @@ describe DataGovAu::ABR::Rebuild do
         newer_text = member_text(1, kept.collect{|abn| record_line(abn, status: abn == held[40] ? 'CAN' : 'ACT')})
         newer = {'public_split_1_10.zip' => {'20261104_Public01.xml' => newer_text}}
         older_release, newer_release = two_releases(directory, older, newer)
-        DataGovAu::ABR::Comparison.new(older_release, newer_release).write
+        DataGovAu::AbnBulkExtract::Comparison.new(older_release, newer_release).write
         built = rebuilt_files(rebuild(older_release, "#{newer_release.delta_path}.partial", "#{newer_release.frame_path}.partial"))
         _(built['20261104_Public01.xml']).must_equal newer_text.b
       end
@@ -46,7 +46,7 @@ describe DataGovAu::ABR::Rebuild do
     it "passes its check" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        _(rebuild(older, delta_path, frame_path).check).must_be_kind_of DataGovAu::ABR::Rebuild
+        _(rebuild(older, delta_path, frame_path).check).must_be_kind_of DataGovAu::AbnBulkExtract::Rebuild
       end
     end
   end
@@ -55,10 +55,10 @@ describe DataGovAu::ABR::Rebuild do
     it "names the file which rebuilt otherwise" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        frame = DataGovAu::ABR::Frame.read(frame_path)
+        frame = DataGovAu::AbnBulkExtract::Frame.read(frame_path)
         frame.members.last.after = "\r\n</Transfer>\r\n".b
         frame.write(frame_path)
-        error = _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        error = _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
         _(error.message).must_include '20261104_Public11.xml'
         _(error.message).wont_include '20261104_Public01.xml'
       end
@@ -67,45 +67,45 @@ describe DataGovAu::ABR::Rebuild do
     it "stops at a delta adding an ABN the older release already holds" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        DataGovAu::ABR::Delta.new(delta_path).write{|changes| changes.add(record_line('11111111111'))}
-        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        DataGovAu::AbnBulkExtract::Delta.new(delta_path).write{|changes| changes.add(record_line('11111111111'))}
+        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
       end
     end
 
     it "stops at a delta changing an ABN the older release does not hold" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        DataGovAu::ABR::Delta.new(delta_path).write{|changes| changes.change(record_line('99999999999'))}
-        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        DataGovAu::AbnBulkExtract::Delta.new(delta_path).write{|changes| changes.change(record_line('99999999999'))}
+        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
       end
     end
 
     it "stops where the frame counts more records than there are" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        frame = DataGovAu::ABR::Frame.read(frame_path)
+        frame = DataGovAu::AbnBulkExtract::Frame.read(frame_path)
         frame.members.last.records += 1
         frame.write(frame_path)
-        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
       end
     end
 
     it "stops where the frame counts fewer records than there are" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        frame = DataGovAu::ABR::Frame.read(frame_path)
+        frame = DataGovAu::AbnBulkExtract::Frame.read(frame_path)
         frame.members.last.records -= 1
         frame.write(frame_path)
-        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
       end
     end
 
     it "stops where the frame was made against another release" do
       Dir.mktmpdir do |directory|
         older, _newer, delta_path, frame_path = compared(directory)
-        frame = DataGovAu::ABR::Frame.read(frame_path)
-        DataGovAu::ABR::Frame.new('20261021', frame.members).write(frame_path)
-        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::ABR::RebuildMismatch
+        frame = DataGovAu::AbnBulkExtract::Frame.read(frame_path)
+        DataGovAu::AbnBulkExtract::Frame.new('20261021', frame.members).write(frame_path)
+        _(->{rebuild(older, delta_path, frame_path).check}).must_raise DataGovAu::AbnBulkExtract::RebuildMismatch
       end
     end
   end

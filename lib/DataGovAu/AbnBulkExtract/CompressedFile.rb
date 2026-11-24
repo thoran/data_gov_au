@@ -1,10 +1,10 @@
-# DataGovAu/ABR/CompressedFile.rb
-# DataGovAu::ABR::CompressedFile
+# DataGovAu/AbnBulkExtract/CompressedFile.rb
+# DataGovAu::AbnBulkExtract::CompressedFile
 
 require 'zstd-ruby'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A file of lines compressed with zstd, written and read as a stream so that neither end holds the whole of it. The streaming compressor is driven directly: zstd-ruby's own StreamWriter flushes at every write, ending a block each time and giving up much of what a high level is for.
     class CompressedFile
       LEVEL = 19

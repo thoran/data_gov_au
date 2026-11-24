@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Fetch.rb
-# DataGovAu::ABR::Fetch
+# DataGovAu/AbnBulkExtract/Fetch.rb
+# DataGovAu::AbnBulkExtract::Fetch
 
 require_relative '../Catalogue'
 require_relative './Error'
@@ -8,9 +8,8 @@ require_relative './Release'
 require_relative '../../Thoran/String/NaturalComparison/natural_comparison'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     class Fetch
-      DATASET = 'abn-bulk-extract'
       EXTRACT_FORMAT = Release::EXTRACT_FORMAT
 
       def catalogue

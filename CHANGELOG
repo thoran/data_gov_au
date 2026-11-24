@@ -2,6 +2,17 @@
 
 ## 20261124
 
+0.4.0: /ABR/AbnBulkExtract/, AbnBulkExtract::Config: - #data_directory, ~ #directory
+
+1. + lib/DataGovAu/AbnBulkExtract.rb: What lib/DataGovAu/ABR.rb held. /lib/DataGovAu/ABR/lib/DataGovAu/AbnBulkExtract/: The module is named for the dataset's name in the catalogue, camel-cased.
+2. ~ lib/DataGovAu/ABR.rb: It holds DataGovAu::ABR alone, the module's old name, deprecated, and removed in 0.5.0.
+3. /DataGovAu::AbnBulkExtract::Fetch::DATASET/DataGovAu::AbnBulkExtract::DATASET/
+4. ~ lib/DataGovAu/AbnBulkExtract/Config.rb: - #data_directory, ~ #directory: The extract's own directory is named by the caller, and releases/ sits directly beneath it rather than beneath an abr/ the library added.
+5. /test/DataGovAu/ABR/test/DataGovAu/AbnBulkExtract/. ~ test/helper.rb: The catalogue name is read from the module. ~ test/DataGovAu/AbnBulkExtract/Config_test.rb, Release_test.rb: Releases sit directly beneath the directory given. + test/DataGovAu_test.rb: Each module beneath DataGovAu which defines DATASET is named for it. + test/DataGovAu/ABR_test.rb: The old name is the module, and warns that it is deprecated: 171 runs.
+6. ~ README.md: DataGovAu::AbnBulkExtract throughout. The module's naming is given. Settings and On disk name the extract's own directory. The old name's deprecation is given.
+7. ~ ROADMAP.md: Each dataset's module is named for its name in the catalogue, with no level for its publisher.
+8. ~ TODO: DataGovAu::AbnBulkExtract throughout. + The old name's removal in 0.5.0.
+
 0.3.0: Each release is kept beside its zips as its changes from the one before.
 
 1. + lib/DataGovAu/ABR/Lines.rb: An XML file read as text: its records a line each, the bytes before the first and after the last, whatever other than a line break parts two records, and the SHA-256 of every byte read. A record running over more than one line stops it.

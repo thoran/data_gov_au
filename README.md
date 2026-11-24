@@ -71,11 +71,13 @@ Everything raised is a `DataGovAu::Error`: `CatalogueUnavailable` where the cata
 
 ## The ABN Bulk Extract
 
-`DataGovAu::ABR`, built on the catalogue, holds the Australian Business Register's weekly bulk extract: a snapshot of the public ABN register, two zip files of around 477 MB each, holding twenty XML files and some 12 GB uncompressed. It fetches each release, reads its records, and keeps each release after the first as its changes from the one before.
+`DataGovAu::AbnBulkExtract`, built on the catalogue, holds the Australian Business Register's weekly bulk extract: a snapshot of the public ABN register, two zip files of around 477 MB each, holding twenty XML files and some 12 GB uncompressed. It fetches each release, reads its records, and keeps each release after the first as its changes from the one before. It is named for the dataset's name in the catalogue, `abn-bulk-extract`, which `DataGovAu::AbnBulkExtract::DATASET` holds.
 
 ```ruby
-require 'DataGovAu/ABR'
+require 'DataGovAu/AbnBulkExtract'
 ```
+
+`require 'DataGovAu/ABR'` and `DataGovAu::ABR`, its name before 0.4.0, still load, deprecated, until 0.5.0.
 
 Its parts, in the order a release passes through them:
 
@@ -92,11 +94,11 @@ The extract is a snapshot of current state. Nothing in it says an ABN is new; th
 
 ### Settings
 
-`DataGovAu::ABR::Config` holds what the rest share: `data_directory:`, `api_url:` and `user_agent:`, taken as keywords or through its setters, and it yields itself to a block. The API's URL and the user agent default as the catalogue's do. The data directory has no default, and is named as missing where it is first wanted, a release kept anywhere but where it was meant to be being a week lost to those held.
+`DataGovAu::AbnBulkExtract::Config` holds what the rest share: `directory:`, `api_url:` and `user_agent:`, taken as keywords or through its setters, and it yields itself to a block. The API's URL and the user agent default as the catalogue's do. The directory, the extract's own, has no default, and is named as missing where it is first wanted, a release kept anywhere but where it was meant to be being a week lost to those held.
 
 ```ruby
-config = DataGovAu::ABR::Config.new(data_directory: '/srv/data_gov_au')
-config = DataGovAu::ABR::Config.new{|c| c.data_directory = '/srv/data_gov_au'}
+config = DataGovAu::AbnBulkExtract::Config.new(directory: '/srv/data_gov_au/abn-bulk-extract')
+config = DataGovAu::AbnBulkExtract::Config.new{|c| c.directory = '/srv/data_gov_au/abn-bulk-extract'}
 ```
 
 The library reads no file: where the settings are kept is for the program using it.
@@ -104,7 +106,7 @@ The library reads no file: where the settings are kept is for the program using 
 ### Fetching
 
 ```ruby
-fetch = DataGovAu::ABR::Fetch.new(config)
+fetch = DataGovAu::AbnBulkExtract::Fetch.new(config)
 
 fetch.release.to_s                     # => "20261028"
 fetch.modified_on.strftime('%Y%m%d')   # => "20261027"
@@ -120,7 +122,7 @@ Two dates are given because they differ. A release is named for the date the ext
 ### Parsing
 
 ```ruby
-DataGovAu::ABR::Extract.new(release).each_record do |record|
+DataGovAu::AbnBulkExtract::Extract.new(release).each_record do |record|
   record[:abn]          # => "11000047950"
 end
 ```
@@ -128,10 +130,10 @@ end
 A release already held is had by its date, without going to the catalogue, and each file can be set against the count it carries:
 
 ```ruby
-date = DataGovAu::ABR::Release.dates_held(config).first
-release = DataGovAu::ABR::Release.new(config, date)
+date = DataGovAu::AbnBulkExtract::Release.dates_held(config).first
+release = DataGovAu::AbnBulkExtract::Release.new(config, date)
 
-DataGovAu::ABR::Extract.new(release).each_file do |name, parser|
+DataGovAu::AbnBulkExtract::Extract.new(release).each_file do |name, parser|
   parser.each_record{|record| record[:names]}
   parser.whole?         # => true, where the file reports no error and gave up as many records as it promised
 end
@@ -142,23 +144,22 @@ Reading touches nothing on the network. `whole?` sets a file against the count i
 ### On disk
 
 ```
-/srv/data_gov_au/
-  abr/
-    releases/
-      20261028/
-        public_split_1_10.zip
-        public_split_11_20.zip
-        bulkextract.xsd
-        abnlookupbulkextractreadme.pdf
-        abn-bulk-extract-resources.csv
-        catalogue.json
-      20261104/
-        ...
-        delta.zst
-        frame.json.zst
+/srv/data_gov_au/abn-bulk-extract/
+  releases/
+    20261028/
+      public_split_1_10.zip
+      public_split_11_20.zip
+      bulkextract.xsd
+      abnlookupbulkextractreadme.pdf
+      abn-bulk-extract-resources.csv
+      catalogue.json
+    20261104/
+      ...
+      delta.zst
+      frame.json.zst
 ```
 
-Each release directory is self-describing: the data, the schema and readme needed to read it, and the catalogue entry it was found through — where it came from, when, and under what licence. A parser corrected later can be run again over the releases it first got wrong, which is only possible while the releases are still held.
+The directory is the caller's to name, and what lies beneath it the library's. Each release directory is self-describing: the data, the schema and readme needed to read it, and the catalogue entry it was found through — where it came from, when, and under what licence. A parser corrected later can be run again over the releases it first got wrong, which is only possible while the releases are still held.
 
 ### Releases kept as differences
 
@@ -175,14 +176,14 @@ A delta is trusted only once it has given its release back. Both files are writt
 
 Nothing is removed. The zips stay as they were fetched; their removal is to come, on the caller's asking, and refused for a release which does not rebuild exactly through the whole chain.
 
-A release can be kept so while the extract is laid out a record a line, as it is now, each record carrying its ABN and the ABNs rising throughout. The files were once written with records running over many lines. Were they again, the comparison would stop with `DataGovAu::ABR::ExtractMalformed`, and the release would stay whole.
+A release can be kept so while the extract is laid out a record a line, as it is now, each record carrying its ABN and the ABNs rising throughout. The files were once written with records running over many lines. Were they again, the comparison would stop with `DataGovAu::AbnBulkExtract::ExtractMalformed`, and the release would stay whole.
 
 ```ruby
-config = DataGovAu::ABR::Config.new(data_directory: '/srv/data_gov_au')
-DataGovAu::ABR::Comparison.pending(config).each(&:perform)
+config = DataGovAu::AbnBulkExtract::Config.new(directory: '/srv/data_gov_au/abn-bulk-extract')
+DataGovAu::AbnBulkExtract::Comparison.pending(config).each(&:perform)
 
-release = DataGovAu::ABR::Release.new(config, Date.new(2026, 11, 4))
-DataGovAu::ABR::Delta.new(release.delta_path).each_change do |change|
+release = DataGovAu::AbnBulkExtract::Release.new(config, Date.new(2026, 11, 4))
+DataGovAu::AbnBulkExtract::Delta.new(release.delta_path).each_change do |change|
   change.kind     # => "A", "C" or "R"
   change.abn      # => "11000047950"
   change.record   # => the record as the extract holds it, or nil where the ABN was removed
@@ -279,7 +280,7 @@ The order the files are read in matters more than it looks. The records are one 
 
 Incorporates or develops data sourced from the Australian Business Register, used under [CC BY 3.0 AU](https://creativecommons.org/licenses/by/3.0/au/). The ABR does not endorse this tool or its output.
 
-Any output leaving the machine must carry that attribution; `DataGovAu::ABR::ATTRIBUTION` holds the line.
+Any output leaving the machine must carry that attribution; `DataGovAu::AbnBulkExtract::ATTRIBUTION` holds the line.
 
 
 ## Licence

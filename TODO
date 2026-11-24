@@ -1,7 +1,8 @@
 # TODO
 
-1. DataGovAu::ABR: a release rebuilt from the first held through every delta since, and read by Extract as a release held whole is. A release so rebuilt checked file by file against hashes its caller gives, so that they can be taken by unzip and shasum rather than by this library.
-2. DataGovAu::ABR: the zips of a release removed on its caller's asking, refused where it is the first held or the newest, or does not rebuild exactly through the whole chain.
-3. DataGovAu::ABR: storage, every record and every name stored with the dates over which it held, nothing filtered and nothing derived at ingest.
-4. DataGovAu::ABR: querying, every criterion a WHERE clause, none of them applied at ingest.
-5. DataGovAu::ABR: output, CSV through dsv, carrying the ABR's attribution.
+1. DataGovAu::AbnBulkExtract: a release rebuilt from the first held through every delta since, and read by Extract as a release held whole is. A release so rebuilt checked file by file against hashes its caller gives, so that they can be taken by unzip and shasum rather than by this library.
+2. DataGovAu::AbnBulkExtract: the zips of a release removed on its caller's asking, refused where it is the first held or the newest, or does not rebuild exactly through the whole chain.
+3. DataGovAu::AbnBulkExtract: storage, every record and every name stored with the dates over which it held, nothing filtered and nothing derived at ingest.
+4. DataGovAu::AbnBulkExtract: querying, every criterion a WHERE clause, none of them applied at ingest.
+5. DataGovAu::AbnBulkExtract: output, CSV through dsv, carrying the ABR's attribution.
+6. DataGovAu::ABR: removed in 0.5.0, with lib/DataGovAu/ABR.rb and its test.

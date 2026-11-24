@@ -1,25 +1,25 @@
-# test/DataGovAu/ABR/Parser_test.rb
+# test/DataGovAu/AbnBulkExtract/Parser_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Parser do
+describe DataGovAu::AbnBulkExtract::Parser do
   describe "what the file says of itself" do
     it "reports the sequence number, the record count and the extract time" do
-      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
       _(parser.file_sequence_number).must_equal 1
       _(parser.record_count).must_equal 9
       _(parser.extract_time).must_equal '2026-10-20T03:17:42'
     end
 
     it "reports the error the file names, none where it was written out whole" do
-      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
       _(parser.error).must_equal 'none'
       _(parser.error_free?).must_equal true
     end
 
     # A file which gave up fewer records than it promised has been truncated, and is worth knowing about rather than passing as a smaller week.
     it "counts itself whole where it gave up as many records as it promised" do
-      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+      parser = File.open(fixture_path('20261020Public01.xml'), 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
       _(parser.records_parsed).must_equal 9
       _(parser.whole?).must_equal true
     end
@@ -29,7 +29,7 @@ describe DataGovAu::ABR::Parser do
         path = File.join(directory, 'cut.xml')
         whole = File.read(fixture_path('20261020Public01.xml'))
         File.write(path, whole[0, whole.rindex('<ABR ')] + '</Transfer>')
-        parser = File.open(path, 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+        parser = File.open(path, 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
         _(parser.records_parsed).must_equal 8
         _(parser.record_count).must_equal 9
         _(parser.whole?).must_equal false
@@ -40,7 +40,7 @@ describe DataGovAu::ABR::Parser do
       Dir.mktmpdir do |directory|
         path = File.join(directory, 'erred.xml')
         File.write(path, File.read(fixture_path('20261020Public01.xml')).sub('<Transfer error="none">', '<Transfer error="partial">'))
-        parser = File.open(path, 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+        parser = File.open(path, 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
         _(parser.records_parsed).must_equal 9
         _(parser.error).must_equal 'partial'
         _(parser.whole?).must_equal false
@@ -51,7 +51,7 @@ describe DataGovAu::ABR::Parser do
       Dir.mktmpdir do |directory|
         path = File.join(directory, 'unnamed.xml')
         File.write(path, File.read(fixture_path('20261020Public01.xml')).sub('<Transfer error="none">', '<Transfer>'))
-        parser = File.open(path, 'rb'){|file| DataGovAu::ABR::Parser.new(file).each_record{}}
+        parser = File.open(path, 'rb'){|file| DataGovAu::AbnBulkExtract::Parser.new(file).each_record{}}
         _(parser.error).must_be_nil
         _(parser.whole?).must_equal false
       end
@@ -187,7 +187,7 @@ describe DataGovAu::ABR::Parser do
 
     it "gives back an enumerator where no block is given" do
       File.open(fixture_path('20261020Public01.xml'), 'rb') do |file|
-        _(DataGovAu::ABR::Parser.new(file).each_record).must_be_kind_of Enumerator
+        _(DataGovAu::AbnBulkExtract::Parser.new(file).each_record).must_be_kind_of Enumerator
       end
     end
   end

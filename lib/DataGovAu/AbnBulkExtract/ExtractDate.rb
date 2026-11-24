@@ -1,12 +1,12 @@
-# DataGovAu/ABR/ExtractDate.rb
-# DataGovAu::ABR::ExtractDate
+# DataGovAu/AbnBulkExtract/ExtractDate.rb
+# DataGovAu::AbnBulkExtract::ExtractDate
 
 require 'date'
 
 require_relative './Error'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # The date an extract carries itself, read from the name of the first file inside one of its zips. The catalogue's last_modified dates the record rather than the data and moves whenever data.gov.au touches a resource, so it would name a release which held nothing new.
     class ExtractDate
       DATED_NAME = /\A(\d{8})/

@@ -1,13 +1,13 @@
-# test/DataGovAu/ABR/Lines_test.rb
+# test/DataGovAu/AbnBulkExtract/Lines_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Lines do
+describe DataGovAu::AbnBulkExtract::Lines do
   let(:records){[record_line('11111111111'), record_line('22222222222', status: 'CAN'), record_line('33333333333')]}
   let(:text){member_text(1, records)}
 
   def read(text, name = '20261028_Public01.xml')
-    lines = DataGovAu::ABR::Lines.new(StringIO.new(text.b), name)
+    lines = DataGovAu::AbnBulkExtract::Lines.new(StringIO.new(text.b), name)
     [lines, lines.each_record.to_a]
   end
 
@@ -63,15 +63,15 @@ describe DataGovAu::ABR::Lines do
   # Such a file could not be written out again from its records, so it stops rather than being kept as a difference wrongly.
   describe "a file laid out otherwise" do
     it "stops at a record running over more than one line, as the files were once laid out" do
-      _(->{read(File.binread(fixture_path('20261020Public01.xml')))}).must_raise DataGovAu::ABR::ExtractMalformed
+      _(->{read(File.binread(fixture_path('20261020Public01.xml')))}).must_raise DataGovAu::AbnBulkExtract::ExtractMalformed
     end
 
     it "stops at two records on one line" do
-      _(->{read(text.sub("</ABR>\r\n<ABR ", '</ABR><ABR '))}).must_raise DataGovAu::ABR::ExtractMalformed
+      _(->{read(text.sub("</ABR>\r\n<ABR ", '</ABR><ABR '))}).must_raise DataGovAu::AbnBulkExtract::ExtractMalformed
     end
 
     it "stops at a record carrying no ABN" do
-      _(->{read(member_text(1, ['<ABR replaced="N"></ABR>']))}).must_raise DataGovAu::ABR::ExtractMalformed
+      _(->{read(member_text(1, ['<ABR replaced="N"></ABR>']))}).must_raise DataGovAu::AbnBulkExtract::ExtractMalformed
     end
   end
 end

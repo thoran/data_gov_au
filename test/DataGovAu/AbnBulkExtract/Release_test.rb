@@ -1,21 +1,21 @@
-# test/DataGovAu/ABR/Release_test.rb
+# test/DataGovAu/AbnBulkExtract/Release_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Release do
+describe DataGovAu::AbnBulkExtract::Release do
   let(:resource){resource_from(extract_resource('ABN Bulk Extract Part 1', 'public_split_1_10.zip', '2026-10-27T21:39:23', 40))}
 
   describe "where it puts a release" do
     it "names the directory for the date the release was published" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
-        _(release.directory).must_equal File.join(directory, 'abr', 'releases', '20261027')
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
+        _(release.directory).must_equal File.join(directory, 'releases', '20261027')
       end
     end
 
     it "prints as the release date" do
       Dir.mktmpdir do |directory|
-        _(DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), []).to_s).must_equal '20261027'
+        _(DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), []).to_s).must_equal '20261027'
       end
     end
   end
@@ -23,7 +23,7 @@ describe DataGovAu::ABR::Release do
   describe "what it counts as held" do
     it "is not held where the file is absent" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
         _(release.held?(resource)).must_equal false
         _(release.complete?).must_equal false
         _(release.missing).must_equal [resource]
@@ -32,7 +32,7 @@ describe DataGovAu::ABR::Release do
 
     it "is held where the file is present at the length the catalogue reports" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
         release.create_directory
         File.binwrite(release.path_for(resource), 'x' * 40)
         _(release.held?(resource)).must_equal true
@@ -44,7 +44,7 @@ describe DataGovAu::ABR::Release do
     # A download cut short leaves a short file, which must not pass for a held one.
     it "is not held where the file is present at another length" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
         release.create_directory
         File.binwrite(release.path_for(resource), 'x' * 39)
         _(release.held?(resource)).must_equal false
@@ -54,7 +54,7 @@ describe DataGovAu::ABR::Release do
     it "is held on presence alone where the catalogue reports no length" do
       Dir.mktmpdir do |directory|
         sizeless = resource_from(resource.to_h.merge('size' => nil))
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [sizeless])
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [sizeless])
         release.create_directory
         File.binwrite(release.path_for(sizeless), 'x')
         _(release.held?(sizeless)).must_equal true
@@ -65,7 +65,7 @@ describe DataGovAu::ABR::Release do
   describe "the catalogue entry it records" do
     it "writes the package beside the files" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 27), [resource])
         release.record_catalogue(package)
         _(File.exist?(release.catalogue_path)).must_equal true
         _(JSON.parse(File.read(release.catalogue_path))['name']).must_equal 'abn-bulk-extract'
@@ -112,7 +112,7 @@ describe DataGovAu::ABR::Release do
   describe "the releases already on disk" do
     it "reports none where nothing has been retrieved" do
       Dir.mktmpdir do |directory|
-        _(DataGovAu::ABR::Release.dates_held(config_in(directory))).must_equal []
+        _(DataGovAu::AbnBulkExtract::Release.dates_held(config_in(directory))).must_equal []
       end
     end
 
@@ -120,7 +120,7 @@ describe DataGovAu::ABR::Release do
       Dir.mktmpdir do |directory|
         config = config_in(directory)
         ['20261013', '20261027', '20261020'].each{|name| FileUtils.mkdir_p(File.join(config.releases_directory, name))}
-        _(DataGovAu::ABR::Release.dates_held(config)).must_equal [Date.new(2026, 10, 27), Date.new(2026, 10, 20), Date.new(2026, 10, 13)]
+        _(DataGovAu::AbnBulkExtract::Release.dates_held(config)).must_equal [Date.new(2026, 10, 27), Date.new(2026, 10, 20), Date.new(2026, 10, 13)]
       end
     end
 
@@ -128,7 +128,7 @@ describe DataGovAu::ABR::Release do
       Dir.mktmpdir do |directory|
         config = config_in(directory)
         ['20261027', 'scratch'].each{|name| FileUtils.mkdir_p(File.join(config.releases_directory, name))}
-        _(DataGovAu::ABR::Release.dates_held(config)).must_equal [Date.new(2026, 10, 27)]
+        _(DataGovAu::AbnBulkExtract::Release.dates_held(config)).must_equal [Date.new(2026, 10, 27)]
       end
     end
   end

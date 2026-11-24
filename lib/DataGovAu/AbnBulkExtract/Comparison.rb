@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Comparison.rb
-# DataGovAu::ABR::Comparison
+# DataGovAu/AbnBulkExtract/Comparison.rb
+# DataGovAu::AbnBulkExtract::Comparison
 
 require 'fileutils'
 
@@ -10,7 +10,7 @@ require_relative './Rebuild'
 require_relative './Release'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A release set against the one before it, both held whole: what changed between them written as the newer release's delta, and what lies outside the records as its frame. Both are checked by rebuilding the newer release from the older before either is trusted. Nothing is removed: the zips stay as they are.
     class Comparison
       PARTIAL_SUFFIX = '.partial'

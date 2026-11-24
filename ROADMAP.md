@@ -5,7 +5,7 @@ The discrete jobs are in TODO, and what is still undecided in PROPOSED.md. This 
 
 ## Datasets
 
-Each dataset gets a module of its own beneath `DataGovAu`, named for its publisher and built on the catalogue: first the Australian Business Register's ABN bulk extract, as `DataGovAu::ABR`. What a dataset needs beyond finding and downloading its resources — keeping releases, parsing them, storing and comparing them — stays with that dataset until a second shows which of it is shared.
+Each dataset gets a module of its own beneath `DataGovAu`, built on the catalogue and named for the dataset's name there, camel-cased, with no level for its publisher: first the Australian Business Register's `abn-bulk-extract`, as `DataGovAu::AbnBulkExtract`. A publisher's name, mechanically cased, would be unwieldy, and shortened would be chosen by hand; a dataset moved between publishers keeps its name in the catalogue; and the publisher is still to be had from the catalogue entry and the attribution. What a dataset needs beyond finding and downloading its resources — keeping releases, parsing them, storing and comparing them — stays with that dataset until a second shows which of it is shared.
 
 
 ## The catalogue

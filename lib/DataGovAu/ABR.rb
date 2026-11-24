@@ -1,25 +1,11 @@
 # DataGovAu/ABR.rb
 # DataGovAu::ABR
 
-# Description: The Australian Business Register's weekly bulk extract: fetched from data.gov.au, stored locally, and queried for businesses which have newly appeared.
+# The bulk extract's module by the name it had before 0.4.0, so that code which reads the extract without a Config, as through the Parser, still loads. Deprecated, and removed in 0.5.0.
 
-require_relative './ABR/Comparison'
-require_relative './ABR/CompressedFile'
-require_relative './ABR/Config'
-require_relative './ABR/Delta'
-require_relative './ABR/Error'
-require_relative './ABR/Extract'
-require_relative './ABR/ExtractDate'
-require_relative './ABR/Fetch'
-require_relative './ABR/Frame'
-require_relative './ABR/Lines'
-require_relative './ABR/Parser'
-require_relative './ABR/Rebuild'
-require_relative './ABR/Release'
+require_relative './AbnBulkExtract'
 
 module DataGovAu
-  module ABR
-    # Required of anything which leaves the machine, the extract being published under CC BY 3.0 AU.
-    ATTRIBUTION = 'Contains data sourced from the Australian Business Register, used under CC BY 3.0 AU.'
-  end
+  ABR = AbnBulkExtract
+  deprecate_constant :ABR
 end

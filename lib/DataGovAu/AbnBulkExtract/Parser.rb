@@ -1,12 +1,12 @@
-# DataGovAu/ABR/Parser.rb
-# DataGovAu::ABR::Parser
+# DataGovAu/AbnBulkExtract/Parser.rb
+# DataGovAu::AbnBulkExtract::Parser
 
 require 'ox'
 
 require_relative './Error'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # One XML file of an extract, read as a stream and given up one record at a time. Nothing is filtered, nothing is derived and nothing is discarded: every element and attribute the schema allows for is carried into the record, dates as the strings the extract gives them, so that what is asked of the data later is not settled here.
     #
     # A record comes out shaped so:

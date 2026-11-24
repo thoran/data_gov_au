@@ -1,10 +1,10 @@
-# DataGovAu/ABR/Error.rb
-# DataGovAu::ABR::ExtractUndated, ExtractMalformed, RebuildMismatch, NothingToParse
+# DataGovAu/AbnBulkExtract/Error.rb
+# DataGovAu::AbnBulkExtract::ExtractUndated, ExtractMalformed, RebuildMismatch, NothingToParse
 
 require_relative '../Error'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # A zip did not name the date of the extract it holds, so the release cannot be named.
     class ExtractUndated < Error; end
 

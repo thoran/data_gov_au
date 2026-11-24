@@ -1,5 +1,5 @@
-# DataGovAu/ABR/Frame.rb
-# DataGovAu::ABR::Frame
+# DataGovAu/AbnBulkExtract/Frame.rb
+# DataGovAu::AbnBulkExtract::Frame
 
 require 'json'
 require 'zstd-ruby'
@@ -8,7 +8,7 @@ require_relative './CompressedFile'
 require_relative './Error'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # Everything in a release outside its records, file by file: each file's name, the bytes before its first record and after its last, how many records it holds, what parts two records wherever it is other than a line break, and the SHA-256 of the whole of it. With the release before it and its delta, that is all that is needed to write the release out again exactly, and the hashes say whether it was.
     class Frame
       Member = Struct.new(:name, :before, :after, :records, :gaps, :sha256)

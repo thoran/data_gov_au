@@ -1,12 +1,12 @@
-# DataGovAu/ABR/Lines.rb
-# DataGovAu::ABR::Lines
+# DataGovAu/AbnBulkExtract/Lines.rb
+# DataGovAu::AbnBulkExtract::Lines
 
 require 'digest'
 
 require_relative './Error'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     # One XML file of an extract read as the text it is rather than as XML: its records, each on a line of its own, the bytes before the first of them and after the last, and wherever two records are parted by anything other than a line break, what parts them. That is enough to write the file out again byte for byte from its records, which is what lets a release be kept as its changes from the week before. A record which runs over more than one line stops it, a file laid out so being one which could not be rebuilt from its records.
     class Lines
       ABN = /<ABN [^>]*>(\d{11})<\/ABN>/

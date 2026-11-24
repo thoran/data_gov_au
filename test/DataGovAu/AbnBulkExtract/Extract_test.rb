@@ -1,13 +1,13 @@
-# test/DataGovAu/ABR/Extract_test.rb
+# test/DataGovAu/AbnBulkExtract/Extract_test.rb
 
 require_relative '../../helper'
 
-describe DataGovAu::ABR::Extract do
+describe DataGovAu::AbnBulkExtract::Extract do
   describe "reading out of the zips" do
     it "gives up the records of a zipped file" do
       Dir.mktmpdir do |directory|
         release = release_holding(directory, Date.new(2026, 10, 28))
-        _(DataGovAu::ABR::Extract.new(release).each_record.to_a.length).must_equal 9
+        _(DataGovAu::AbnBulkExtract::Extract.new(release).each_record.to_a.length).must_equal 9
       end
     end
 
@@ -17,7 +17,7 @@ describe DataGovAu::ABR::Extract do
           'public_split_1_10.zip' => ['20261028_Public01.xml', '20261028_Public02.xml'],
         })
         reached = []
-        DataGovAu::ABR::Extract.new(release).each_file{|member, parser| reached << [member, parser.each_record{}.records_parsed]}
+        DataGovAu::AbnBulkExtract::Extract.new(release).each_file{|member, parser| reached << [member, parser.each_record{}.records_parsed]}
         _(reached).must_equal [['20261028_Public01.xml', 9], ['20261028_Public02.xml', 9]]
       end
     end
@@ -25,7 +25,7 @@ describe DataGovAu::ABR::Extract do
     it "yields each file as its name and the text inflated" do
       Dir.mktmpdir do |directory|
         release = whole_release(directory, Date.new(2026, 10, 28), older_files)
-        members = DataGovAu::ABR::Extract.new(release).each_member.collect{|name, io| [name, io.read]}
+        members = DataGovAu::AbnBulkExtract::Extract.new(release).each_member.collect{|name, io| [name, io.read]}
         _(members).must_equal older_files.values.inject(:merge).to_a
       end
     end
@@ -36,7 +36,7 @@ describe DataGovAu::ABR::Extract do
           'public_split_1_10.zip' => ['20261028_Public01.xml'],
           'public_split_11_20.zip' => ['20261028_Public11.xml'],
         })
-        _(DataGovAu::ABR::Extract.new(release).each_record.to_a.length).must_equal 18
+        _(DataGovAu::AbnBulkExtract::Extract.new(release).each_record.to_a.length).must_equal 18
       end
     end
   end
@@ -49,7 +49,7 @@ describe DataGovAu::ABR::Extract do
           'public_split_11_20.zip' => ['20261028_Public11.xml', '20261028_Public20.xml'],
           'public_split_1_10.zip' => ['20261028_Public01.xml', '20261028_Public10.xml'],
         })
-        names = DataGovAu::ABR::Extract.new(release).members.collect{|_path, name| name}
+        names = DataGovAu::AbnBulkExtract::Extract.new(release).members.collect{|_path, name| name}
         _(names).must_equal [
           '20261028_Public01.xml',
           '20261028_Public10.xml',
@@ -66,7 +66,7 @@ describe DataGovAu::ABR::Extract do
           'public_split_11_20.zip' => ['20261028_Public11.xml', '20261028_Public2.xml'],
           'public_split_1_10.zip' => ['20261028_Public1.xml', '20261028_Public10.xml'],
         })
-        names = DataGovAu::ABR::Extract.new(release).members.collect{|_path, name| name}
+        names = DataGovAu::AbnBulkExtract::Extract.new(release).members.collect{|_path, name| name}
         _(names).must_equal [
           '20261028_Public1.xml',
           '20261028_Public2.xml',
@@ -80,9 +80,9 @@ describe DataGovAu::ABR::Extract do
   describe "a release with nothing in it" do
     it "stops rather than reporting an empty extract" do
       Dir.mktmpdir do |directory|
-        release = DataGovAu::ABR::Release.new(config_in(directory), Date.new(2026, 10, 28))
+        release = DataGovAu::AbnBulkExtract::Release.new(config_in(directory), Date.new(2026, 10, 28))
         release.create_directory
-        _(->{DataGovAu::ABR::Extract.new(release).each_file{}}).must_raise DataGovAu::ABR::NothingToParse
+        _(->{DataGovAu::AbnBulkExtract::Extract.new(release).each_file{}}).must_raise DataGovAu::AbnBulkExtract::NothingToParse
       end
     end
   end
@@ -91,7 +91,7 @@ describe DataGovAu::ABR::Extract do
     it "gives back an enumerator" do
       Dir.mktmpdir do |directory|
         release = release_holding(directory, Date.new(2026, 10, 28))
-        _(DataGovAu::ABR::Extract.new(release).each_record).must_be_kind_of Enumerator
+        _(DataGovAu::AbnBulkExtract::Extract.new(release).each_record).must_be_kind_of Enumerator
       end
     end
   end

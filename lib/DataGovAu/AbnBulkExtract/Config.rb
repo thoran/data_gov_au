@@ -1,10 +1,10 @@
-# DataGovAu/ABR/Config.rb
-# DataGovAu::ABR::Config
+# DataGovAu/AbnBulkExtract/Config.rb
+# DataGovAu::AbnBulkExtract::Config
 
 require_relative '../Catalogue'
 
 module DataGovAu
-  module ABR
+  module AbnBulkExtract
     class Config
       DEFAULTS = {
         api_url: Catalogue::API_URL,
@@ -12,16 +12,12 @@ module DataGovAu
       }
 
       attr_accessor :api_url, :user_agent
-      attr_writer :data_directory
+      attr_writer :directory
 
-      def data_directory
-        validate_args(data_directory: @data_directory)
-        File.expand_path(@data_directory)
-      end
-
-      # The extract's own directory beneath the data directory, which other datasets may come to share.
+      # The extract's own directory, named by the caller.
       def directory
-        File.join(data_directory, 'abr')
+        validate_args(directory: @directory)
+        File.expand_path(@directory)
       end
 
       # One directory per weekly release, named for the date it was published, holding the zips as data.gov.au serves them along with the catalogue entry they were found through.
@@ -31,8 +27,8 @@ module DataGovAu
 
       private
 
-      def initialize(data_directory: nil, api_url: DEFAULTS[:api_url], user_agent: DEFAULTS[:user_agent])
-        @data_directory = data_directory
+      def initialize(directory: nil, api_url: DEFAULTS[:api_url], user_agent: DEFAULTS[:user_agent])
+        @directory = directory
         @api_url = api_url
         @user_agent = user_agent
         yield(self) if block_given?
