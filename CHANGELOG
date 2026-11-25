@@ -1,5 +1,24 @@
 # data_gov_au/CHANGELOG
 
+## 20261125
+
+0.5.0: + DataGovAu::AsicCompanies, - DataGovAu::ABR
+
+1. + lib/DataGovAu/AsicCompanies.rb: + DATASET, + ATTRIBUTION.
+2. + lib/DataGovAu/AsicCompanies/Config.rb: As the extract's, the register's own directory named by the caller.
+3. + lib/DataGovAu/AsicCompanies/ExtractDate.rb: A release is dated by the zip's record of when the file inside it was written, that file being named for the month alone.
+4. + lib/DataGovAu/AsicCompanies/Release.rb: A directory for each weekly release, named for that date, holding the files under the names data.gov.au serves them as and the catalogue entry they were found through.
+5. + lib/DataGovAu/AsicCompanies/Fetch.rb: The zip and the help file are kept, and not the register unzipped, which holds what the zip does at five times the size.
+6. + lib/DataGovAu/AsicCompanies/Error.rb: + ExtractUndated.
+7. - lib/DataGovAu/ABR.rb: Deprecated in 0.4.0.
+8. + test/DataGovAu/AsicCompanies/helper.rb, Config_test.rb, ExtractDate_test.rb, Fetch_test.rb, Release_test.rb. - test/DataGovAu/ABR_test.rb: 206 runs.
+9. ~ README.md: + The ASIC Company Dataset. - The old name's deprecation.
+10. ~ ROADMAP.md: + The ASIC Company Dataset.
+11. ~ PROPOSED.md: + Datasets: Modules made from a dataset's name when first looked up, named by a mapping which cannot give two names the same constant, and datasets sorted into kinds. + The ASIC Company Dataset.
+12. ~ TODO: - The old name's removal. + The register's parsing, through dsv.
+13. ~ CHANGELOG: + The VERSION items of 0.1.0 to 0.4.0.
+14. ~ DataGovAu::VERSION: /0.4.0/0.5.0/
+
 ## 20261124
 
 0.4.0: /ABR/AbnBulkExtract/, AbnBulkExtract::Config: - #data_directory, ~ #directory
@@ -12,6 +31,7 @@
 6. ~ README.md: DataGovAu::AbnBulkExtract throughout. The module's naming is given. Settings and On disk name the extract's own directory. The old name's deprecation is given.
 7. ~ ROADMAP.md: Each dataset's module is named for its name in the catalogue, with no level for its publisher.
 8. ~ TODO: DataGovAu::AbnBulkExtract throughout. + The old name's removal in 0.5.0.
+9. ~ DataGovAu::VERSION: /0.3.0/0.4.0/
 
 0.3.0: Each release is kept beside its zips as its changes from the one before.
 
@@ -32,6 +52,7 @@
 15. ~ ROADMAP.md: Releases land on Tuesdays around 21:39 UTC. - The command, + The stages. + Releases kept as differences. Its undecided items are in PROPOSED.md, which its opening names.
 16. + PROPOSED.md: What is still undecided, under ROADMAP.md's headings.
 17. ~ TODO: + The rebuild through the whole chain, checked against hashes its caller gives. + The zips' removal, on the caller's asking.
+18. ~ DataGovAu::VERSION: /0.2.0/0.3.0/
 
 ## 20261103
 
@@ -49,6 +70,7 @@
 10. + test/DataGovAu/ABR/Parser_test.rb, Extract_test.rb, test/Thoran/String/NaturalComparison/natural_comparison_test.rb, test/Thoran/Array/NaturalSort/natural_sort_test.rb. ~ test/DataGovAu/ABR/Fetch_test.rb: The halves are ordered by the numbers in their names. ~ test/exe/data_gov_au_test.rb: + Parsing. Where the settings put the data directory is tested through -p. ~ test/helper.rb: + release_holding(), fixture_records(), fixture_record(): 130 runs.
 11. ~ README.md: + Parsing, + What a record comes out as, + On the parsing.
 12. ~ TODO: - The parser.
+13. ~ DataGovAu::VERSION: /0.1.0/0.2.0/
 
 0.1.0: Download the current weekly ABR release.
 
@@ -61,6 +83,7 @@
 7. + exe/data_gov_au: + abr. + -d/--data-directory, -n/--dry-run, -q/--quiet, -h/--help. Its config file is read, and the switches taken over it, a setting left blank or a switch left off leaving what lies beneath it standing. A file which is not a mapping stops the run. The data directory defaults to $XDG_DATA_HOME/data_gov_au. The catalogue's date is reported alongside the extract's own, the two differing.
 8. ~ data_gov_au(.rb).gemspec: + switches.rb, + exe/data_gov_au.
 9. + test/DataGovAu/ABR/Config_test.rb, ExtractDate_test.rb, Fetch_test.rb, Release_test.rb, test/exe/data_gov_au_test.rb. ~ test/helper.rb: The dataset's entry, with its halves, schema and readme. ~ test/DataGovAu/Dataset_test.rb, Resource_test.rb: 75 runs.
+10. ~ DataGovAu::VERSION: /0.0.0/0.1.0/
 
 0.0.0: A client for data.gov.au's CKAN API: a dataset found by its name or id, its resources described, and a resource downloaded once.
 

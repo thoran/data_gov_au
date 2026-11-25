@@ -5,7 +5,7 @@ The discrete jobs are in TODO, and what is still undecided in PROPOSED.md. This 
 
 ## Datasets
 
-Each dataset gets a module of its own beneath `DataGovAu`, built on the catalogue and named for the dataset's name there, camel-cased, with no level for its publisher: first the Australian Business Register's `abn-bulk-extract`, as `DataGovAu::AbnBulkExtract`. A publisher's name, mechanically cased, would be unwieldy, and shortened would be chosen by hand; a dataset moved between publishers keeps its name in the catalogue; and the publisher is still to be had from the catalogue entry and the attribution. What a dataset needs beyond finding and downloading its resources — keeping releases, parsing them, storing and comparing them — stays with that dataset until a second shows which of it is shared.
+Each dataset gets a module of its own beneath `DataGovAu`, built on the catalogue and named for the dataset's name there, camel-cased, with no level for its publisher: first the Australian Business Register's `abn-bulk-extract`, as `DataGovAu::AbnBulkExtract`, and then ASIC's `asic-companies`, as `DataGovAu::AsicCompanies`. A publisher's name, mechanically cased, would be unwieldy, and shortened would be chosen by hand; a dataset moved between publishers keeps its name in the catalogue; and the publisher is still to be had from the catalogue entry and the attribution. What a dataset needs beyond finding and downloading its resources — keeping releases, parsing them, storing and comparing them — stays with that dataset until a second shows which of it is shared.
 
 
 ## The catalogue
@@ -23,6 +23,11 @@ The library ships no command. Each stage, fetching and comparing and those to co
 ## The ABN Bulk Extract
 
 Releases land on Tuesdays around 21:39 UTC. The catalogue's last_modified is what a schedule waits on, and needs no download to read.
+
+
+## The ASIC Company Dataset
+
+Releases land on Mondays around 13:50 UTC, Tuesday in Sydney. Its rows are sorted by ACN, as the extract's records are by ABN, so two releases can be set against each other in step. Fetching comes first, so that weeks are held before anything reads them; parsing follows.
 
 
 ## Releases kept as differences

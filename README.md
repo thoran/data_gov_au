@@ -1,6 +1,6 @@
 # data_gov_au
 
-A client for data.gov.au's CKAN API, and the datasets built on it: first the Australian Business Register's weekly ABN bulk extract.
+A client for data.gov.au's CKAN API, and the datasets built on it: first the Australian Business Register's weekly ABN bulk extract, and then ASIC's weekly snapshot of its company register.
 
 
 ## Installation
@@ -76,8 +76,6 @@ Everything raised is a `DataGovAu::Error`: `CatalogueUnavailable` where the cata
 ```ruby
 require 'DataGovAu/AbnBulkExtract'
 ```
-
-`require 'DataGovAu/ABR'` and `DataGovAu::ABR`, its name before 0.4.0, still load, deprecated, until 0.5.0.
 
 Its parts, in the order a release passes through them:
 
@@ -281,6 +279,64 @@ The order the files are read in matters more than it looks. The records are one 
 Incorporates or develops data sourced from the Australian Business Register, used under [CC BY 3.0 AU](https://creativecommons.org/licenses/by/3.0/au/). The ABR does not endorse this tool or its output.
 
 Any output leaving the machine must carry that attribution; `DataGovAu::AbnBulkExtract::ATTRIBUTION` holds the line.
+
+
+## The ASIC Company Dataset
+
+`DataGovAu::AsicCompanies`, built on the catalogue, holds ASIC's weekly snapshot of its company register: every registered company, those deregistered in the past year, and the former names of those registered, some 3 million rows in one tab-separated file of about 401 MB, or 79 MB zipped. It fetches each release; reading its rows is still to come. It is named for the dataset's name in the catalogue, `asic-companies`, which `DataGovAu::AsicCompanies::DATASET` holds.
+
+```ruby
+require 'DataGovAu/AsicCompanies'
+```
+
+Its parts are the extract's, each its own copy until what they share is clear:
+
+- `Config`: the settings the rest share.
+- `Fetch`: the current release found through the catalogue, and whatever of it is not held retrieved.
+- `ExtractDate`: the date the register was extracted, read from the first bytes of the zip.
+- `Release`: a release on disk, its directory named for that date.
+
+### Why a local copy
+
+As with the extract: ASIC uploads a new snapshot each Tuesday, Sydney time, and data.gov.au keeps the current one alone, so a week not fetched is gone for good.
+
+### Settings
+
+`DataGovAu::AsicCompanies::Config` takes `directory:`, the register's own, `api_url:` and `user_agent:`, as the extract's does.
+
+```ruby
+config = DataGovAu::AsicCompanies::Config.new(directory: '/srv/data_gov_au/asic-companies')
+```
+
+### Fetching
+
+```ruby
+fetch = DataGovAu::AsicCompanies::Fetch.new(config)
+
+fetch.release.to_s                     # => "20261124"
+fetch.modified_on.strftime('%Y%m%d')   # => "20261123"
+
+release = fetch.perform{|resource| puts resource.filename}
+```
+
+A release is the zip and the help file. The catalogue also lists the register unzipped, which is not kept: it holds what the zip does at five times the size. Nor are the two the same bytes: for 20261124 the file in the zip was 1,320 bytes shorter, the two having been written a minute apart.
+
+A release is named for the date in the zip's own record of when the file inside it was written, which is the date ASIC gives the extract, in Sydney's time. The file inside is named for the month alone, as `COMPANY_202611.csv`, and the catalogue's `modified_on` is a day earlier in UTC. The record stands in the zip's first few hundred bytes, so it is asked for by range before anything large is retrieved.
+
+### On disk
+
+```
+/srv/data_gov_au/asic-companies/
+  releases/
+    20261124/
+      company_202611.zip
+      company-dataset-help-file.pdf
+      catalogue.json
+```
+
+### Attribution
+
+Contains data sourced from the Australian Securities and Investments Commission, used under [CC BY 3.0 AU](https://creativecommons.org/licenses/by/3.0/au/). `DataGovAu::AsicCompanies::ATTRIBUTION` holds the line.
 
 
 ## Licence

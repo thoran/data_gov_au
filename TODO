@@ -5,4 +5,4 @@
 3. DataGovAu::AbnBulkExtract: storage, every record and every name stored with the dates over which it held, nothing filtered and nothing derived at ingest.
 4. DataGovAu::AbnBulkExtract: querying, every criterion a WHERE clause, none of them applied at ingest.
 5. DataGovAu::AbnBulkExtract: output, CSV through dsv, carrying the ABR's attribution.
-6. DataGovAu::ABR: removed in 0.5.0, with lib/DataGovAu/ABR.rb and its test.
+6. DataGovAu::AsicCompanies: parsing, the tab-separated register read out of the zip through dsv, its byte-order mark and CRLF line ends allowed for.
