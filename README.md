@@ -283,7 +283,7 @@ Any output leaving the machine must carry that attribution; `DataGovAu::AbnBulkE
 
 ## The ASIC Company Dataset
 
-`DataGovAu::AsicCompanies`, built on the catalogue, holds ASIC's weekly snapshot of its company register: every registered company, those deregistered in the past year, and the former names of those registered, some 3 million rows in one tab-separated file of about 401 MB, or 79 MB zipped. It fetches each release; reading its rows is still to come. It is named for the dataset's name in the catalogue, `asic-companies`, which `DataGovAu::AsicCompanies::DATASET` holds.
+`DataGovAu::AsicCompanies`, built on the catalogue, holds ASIC's weekly snapshot of its company register: every registered company, those deregistered in the past year, and the former names of those registered, some 4.5 million rows in one tab-separated file of about 401 MB, or 79 MB zipped. It fetches each release and reads its rows. It is named for the dataset's name in the catalogue, `asic-companies`, which `DataGovAu::AsicCompanies::DATASET` holds.
 
 ```ruby
 require 'DataGovAu/AsicCompanies'
@@ -295,6 +295,8 @@ Its parts are the extract's, each its own copy until what they share is clear:
 - `Fetch`: the current release found through the catalogue, and whatever of it is not held retrieved.
 - `ExtractDate`: the date the register was extracted, read from the first bytes of the zip.
 - `Release`: a release on disk, its directory named for that date.
+- `Extract`: a release's rows, read out of its zip.
+- `Parser`: the register, read a row at a time.
 
 ### Why a local copy
 
@@ -322,6 +324,44 @@ release = fetch.perform{|resource| puts resource.filename}
 A release is the zip and the help file. The catalogue also lists the register unzipped, which is not kept: it holds what the zip does at five times the size. Nor are the two the same bytes: for 20261124 the file in the zip was 1,320 bytes shorter, the two having been written a minute apart.
 
 A release is named for the date in the zip's own record of when the file inside it was written, which is the date ASIC gives the extract, in Sydney's time. The file inside is named for the month alone, as `COMPANY_202611.csv`, and the catalogue's `modified_on` is a day earlier in UTC. The record stands in the zip's first few hundred bytes, so it is asked for by range before anything large is retrieved.
+
+### Parsing
+
+```ruby
+date = DataGovAu::AsicCompanies::Release.dates_held(config).first
+release = DataGovAu::AsicCompanies::Release.new(config, date)
+
+DataGovAu::AsicCompanies::Extract.new(release).each_record do |record|
+  record[:acn]          # => "000000019"
+end
+```
+
+Reading touches nothing on the network. The register is read out of the zip as rubyzip inflates it, a line at a time, and each line is split by dsv, so the 401 MB file is never held whole: the 20261124 release's 4,464,241 rows take about a minute. The header is checked before any row is yielded, and a row with other than fifteen fields stops the read, naming its line, so that a register whose columns have moved is not read under the wrong names.
+
+### What a row comes out as
+
+A row is one name a company has held, so a company comes as many rows as it has had names, under the same ACN. Nothing is filtered, derived or discarded: each field is the string the register holds.
+
+```ruby
+{
+  company_name: 'LOVINI HOLDINGS PTY LTD', acn: '000000019',
+  type: 'APTY', class: 'LMSH', sub_class: 'PROP', status: 'REGD',
+  date_of_registration: '08/01/1990', date_of_deregistration: '',
+  previous_state_of_registration: 'NSW', state_registration_number: '46869041',
+  modified_since_last_report: '', current_name_indicator: '',
+  abn: '89000000019', current_name: 'MONAKA PTY LTD', current_name_start_date: '28/01/2016',
+}
+```
+
+That row is a former name. Its `current_name_indicator` is empty, and its `current_name` and `current_name_start_date` give the name which replaced it. The row for the current name, `MONAKA PTY LTD`, has `current_name_indicator` `'Y'` and those two fields empty.
+
+Kept as the register gives them:
+
+- An empty field is `''`, every column being present in every row.
+- An ABN of `'0'` is a company with none, as 1,708,744 of the 20261124 release's rows are.
+- Dates are `dd/mm/yyyy`.
+- Where `type` is `RACN`, a registered Australian body, `acn` holds its ARBN.
+- A quote in a name is part of it, as in `TUMUT BOWLING & RECREATION CLUB LTD. TRADING AS "CLUB TUMUT" LTD`, the register quoting nothing; and spaces trailing a name are kept.
 
 ### On disk
 

@@ -2,6 +2,22 @@
 
 ## 20261125
 
+0.6.0: + DataGovAu::AsicCompanies::Parser, + DataGovAu::AsicCompanies::Extract
+
+1. + DataGovAu::AsicCompanies::Parser: The register yielded a row at a time, each line split by DSV.parse_line rather than read through DSV#each, which reads every row before yielding the first.
+2. + DataGovAu::AsicCompanies::Extract: A release's rows, read out of its zip as rubyzip inflates it.
+3. ~ DataGovAu::AsicCompanies::Release: + #zip_paths.
+4. ~ DataGovAu::AsicCompanies: + NothingToParse, + RegisterMalformed.
+5. ~ lib/DataGovAu/AsicCompanies.rb: Extract and Parser are required.
+6. ~ data_gov_au(.rb).gemspec: + dsv, ~> 0.13. The description names the ASIC register.
+7. + test/DataGovAu/AsicCompanies/Parser_test.rb, Extract_test.rb. ~ test/DataGovAu/AsicCompanies/Release_test.rb: Its zips are found. ~ test/DataGovAu/AsicCompanies/helper.rb: + asic_rows(), asic_register_text(), asic_release_holding(): 222 runs.
+8. ~ README.md: The ASIC Company Dataset: + Parsing, + What a row comes out as. Its rows are some 4.5 million, not 3.
+9. ~ ROADMAP.md: The ASIC register's rows are read. + 1.0.
+10. ~ PROPOSED.md: Datasets: + Pointer datasets. + Libraries given by the caller for hosts elsewhere. The catalogue: Four of the hosts pointed to are CKAN portals. The ASIC Company Dataset: Rows gathered by ACN as well as yielded one at a time.
+11. ~ TODO: - The register's parsing.
+12. ~ DataGovAu::AbnBulkExtract::Parser, DataGovAu::Catalogue#action, test/DataGovAu/AbnBulkExtract/Extract_test.rb, Lines_test.rb, Parser_test.rb, test/DataGovAu/Dataset_test.rb: Comments and test names say yields or returns where they said gives up.
+13. ~ DataGovAu::VERSION: /0.5.0/0.6.0/
+
 0.5.0: + DataGovAu::AsicCompanies, - DataGovAu::ABR
 
 1. + lib/DataGovAu/AsicCompanies.rb: + DATASET, + ATTRIBUTION.

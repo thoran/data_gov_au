@@ -56,6 +56,13 @@ describe DataGovAu::AsicCompanies::Release do
     end
   end
 
+  it "finds its zips in its directory" do
+    Dir.mktmpdir do |directory|
+      release = asic_release_holding(directory)
+      _(release.zip_paths).must_equal [File.join(release.directory, 'company_202611.zip')]
+    end
+  end
+
   describe "the releases held" do
     it "are none where nothing has been fetched" do
       Dir.mktmpdir do |directory|

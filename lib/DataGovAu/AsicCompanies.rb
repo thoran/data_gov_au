@@ -6,7 +6,9 @@
 require_relative './AsicCompanies/Config'
 require_relative './AsicCompanies/Error'
 require_relative './AsicCompanies/ExtractDate'
+require_relative './AsicCompanies/Extract'
 require_relative './AsicCompanies/Fetch'
+require_relative './AsicCompanies/Parser'
 require_relative './AsicCompanies/Release'
 
 module DataGovAu

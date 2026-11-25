@@ -28,6 +28,11 @@ module DataGovAu
         File.join(directory, resource.filename)
       end
 
+      # The zips in the release's directory, read from the directory rather than from the catalogue, so that a release on disk can be parsed without going back to data.gov.au.
+      def zip_paths
+        @zip_paths ||= Dir.glob(File.join(directory, '*.zip')).sort
+      end
+
       def held?(resource)
         resource.held_at?(path_for(resource))
       end

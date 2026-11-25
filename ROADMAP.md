@@ -27,7 +27,7 @@ Releases land on Tuesdays around 21:39 UTC. The catalogue's last_modified is wha
 
 ## The ASIC Company Dataset
 
-Releases land on Mondays around 13:50 UTC, Tuesday in Sydney. Its rows are sorted by ACN, as the extract's records are by ABN, so two releases can be set against each other in step. Fetching comes first, so that weeks are held before anything reads them; parsing follows.
+Releases land on Mondays around 13:50 UTC, Tuesday in Sydney. Its rows are sorted by ACN, as the extract's records are by ABN, so two releases can be set against each other in step. Fetching came first, so that weeks were held before anything read them; its rows are now read a line at a time through dsv.
 
 
 ## Releases kept as differences
@@ -44,3 +44,20 @@ Set aside, measured over the same two releases:
 
 - git, holding each release's XML. At its defaults it makes no deltas at all, each 605 MB file being over core.bigFileThreshold, so a week costs about as much as its zips. With the threshold raised, a repack of the two releases took 70 minutes and 11.6 GB of memory, and the week came to 9.7 MB. It also stored some files as deltas of other files of the same release, each larger than the file stored whole.
 - zstd --patch-from, each file patched against last week's. Exact, and 0.53 MB for one file at level 19, so about 10.6 MB a week. Each change becomes a match against a distant part of a 605 MB reference, where in the delta the week's changed records sit side by side and compress against one another.
+
+
+## 1.0
+
+1.0 is where what a caller relies upon stops changing: whatever would break a caller if changed afterwards is settled before it, and whatever only adds waits for 1.x.
+
+Before it:
+
+- How a dataset's module is named, and whether it is made from the dataset's name when first looked up, a change to either afterwards renaming constants which callers hold.
+- Datasets held elsewhere, which are most of the catalogue, pointed to: what each resource is and where it is held, read from the catalogue and not fetched.
+- One shape for the datasets held: `DATASET`, `ATTRIBUTION`, a `Config` taking `directory:`, a `Fetch` which skips what is held, a `Release`, and records yielded alike, drawn out of the datasets' own copies once a third, the ACNC's `acnc-register`, shows what is shared.
+- What is written to disk fixed, the releases' directories, `catalogue.json`, and the delta and frame, so that every 1.x reads whatever an earlier one wrote, a week once held being the only copy there is. Whether the schema and readme are kept once, and whether the ASIC register's releases are kept as differences, are settled first.
+- Releases kept as differences finished: a release rebuilt through the whole chain, and zips removed only where it rebuilds exactly.
+- The catalogue's classes and errors as they are to stay, and whether the catalogue becomes a library of its own decided.
+- Each dataset held parsed, as the extract and the ASIC register are.
+
+After it, in 1.x: storage, querying and output, more datasets, package_search and the datastore, and fetching from hosts elsewhere through libraries the caller gives.

@@ -12,7 +12,7 @@ describe DataGovAu::AbnBulkExtract::Lines do
   end
 
   describe "a file laid out a record a line" do
-    it "gives up each record as its ABN and its text" do
+    it "yields each record as its ABN and its text" do
       _lines, read_records = read(text)
       _(read_records).must_equal [['11111111111', records[0]], ['22222222222', records[1]], ['33333333333', records[2]]]
     end

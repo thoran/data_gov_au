@@ -7,7 +7,7 @@ require_relative './Error'
 
 module DataGovAu
   module AbnBulkExtract
-    # One XML file of an extract, read as a stream and given up one record at a time. Nothing is filtered, nothing is derived and nothing is discarded: every element and attribute the schema allows for is carried into the record, dates as the strings the extract gives them, so that what is asked of the data later is not settled here.
+    # One XML file of an extract, read as a stream and yielded one record at a time. Nothing is filtered, nothing is derived and nothing is discarded: every element and attribute the schema allows for is carried into the record, dates as the strings the extract gives them, so that what is asked of the data later is not settled here.
     #
     # A record comes out shaped so:
     #
@@ -44,7 +44,7 @@ module DataGovAu
         @error == NO_ERROR
       end
 
-      # Every record was given up where the file reports no error and holds as many as its own TransferInfo promised.
+      # Every record was yielded where the file reports no error and holds as many as its own TransferInfo promised.
       def whole?
         error_free? && !record_count.nil? && records_parsed == record_count
       end

@@ -24,7 +24,7 @@ describe DataGovAu::Dataset do
     _(DataGovAu::Catalogue.new.dataset('abn-bulk-extract').resources).must_equal []
   end
 
-  it "gives up its entry as the catalogue gave it" do
+  it "returns its entry as the catalogue gave it" do
     _(dataset.to_h).must_equal package
   end
 end

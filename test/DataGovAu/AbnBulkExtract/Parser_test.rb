@@ -36,7 +36,7 @@ describe DataGovAu::AbnBulkExtract::Parser do
       end
     end
 
-    it "counts itself short where the file reports an error, every record given up or not" do
+    it "counts itself short where the file reports an error, every record yielded or not" do
       Dir.mktmpdir do |directory|
         path = File.join(directory, 'erred.xml')
         File.write(path, File.read(fixture_path('20261020Public01.xml')).sub('<Transfer error="none">', '<Transfer error="partial">'))
@@ -58,8 +58,8 @@ describe DataGovAu::AbnBulkExtract::Parser do
     end
   end
 
-  describe "the record it gives up" do
-    it "gives up every record in the file" do
+  describe "the record it yields" do
+    it "yields every record in the file" do
       _(fixture_records.length).must_equal 9
     end
 
@@ -179,7 +179,7 @@ describe DataGovAu::AbnBulkExtract::Parser do
     end
   end
 
-  describe "the shape it gives up" do
+  describe "the shape it yields" do
     # The storage stage writes a row per record, so every record carrying the same keys matters more than the keys being few.
     it "gives every record the same keys" do
       _(fixture_records.collect(&:keys).uniq.length).must_equal 1

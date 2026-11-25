@@ -4,7 +4,7 @@ require_relative '../../helper'
 
 describe DataGovAu::AbnBulkExtract::Extract do
   describe "reading out of the zips" do
-    it "gives up the records of a zipped file" do
+    it "yields the records of a zipped file" do
       Dir.mktmpdir do |directory|
         release = release_holding(directory, Date.new(2026, 10, 28))
         _(DataGovAu::AbnBulkExtract::Extract.new(release).each_record.to_a.length).must_equal 9

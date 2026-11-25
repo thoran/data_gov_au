@@ -51,3 +51,28 @@ def stub_asic_peek(resource = asic_zip_resource, header = asic_zip_header)
     with(headers: {'Range' => "bytes=0-#{DataGovAu::AsicCompanies::ExtractDate::PEEK_LENGTH - 1}"}).
       to_return(status: 206, body: header)
 end
+
+# Rows from the register of 20261124: a company under a former name and then its current one, a company deregistered with no ABN, and a name holding quotes.
+def asic_rows
+  [
+    ['LOVINI HOLDINGS PTY LTD', '000000019', 'APTY', 'LMSH', 'PROP', 'REGD', '08/01/1990', '', 'NSW', '46869041', '', '', '89000000019', 'MONAKA PTY LTD', '28/01/2016'],
+    ['MONAKA PTY LTD', '000000019', 'APTY', 'LMSH', 'PROP', 'REGD', '08/01/1990', '', 'NSW', '46869041', '', 'Y', '89000000019', '', ''],
+    ['COMMONWEALTH PORTLAND CEMENT COMPANY PTY LTD', '000000260', 'APTY', 'LMSH', 'PROP', 'DRGD', '27/05/1907', '13/03/2026', 'NSW', '00010535', '', 'Y', '0', '', ''],
+    ['TUMUT BOWLING & RECREATION CLUB LTD. TRADING AS "CLUB TUMUT" LTD', '001001074', 'APUB', 'LMGT', 'ULSN', 'REGD', '12/05/1972', '', 'NSW', '14592147', '', 'Y', '62001001074', '', ''],
+  ]
+end
+
+# The register as ASIC writes it: a byte-order mark, then the header and each row tab-separated, every line ending CRLF.
+def asic_register_text(rows = asic_rows, header: DataGovAu::AsicCompanies::Parser::COLUMNS.keys)
+  "﻿" + ([header] + rows).collect{|fields| fields.join("\t") + "\r\n"}.join
+end
+
+# A release holding the register zipped, as the fetch leaves one.
+def asic_release_holding(directory, date = Date.new(2026, 11, 24), text = asic_register_text)
+  release = DataGovAu::AsicCompanies::Release.new(asic_config_in(directory), date)
+  release.create_directory
+  Zip::File.open(File.join(release.directory, 'company_202611.zip'), create: true) do |zip|
+    zip.get_output_stream(ASIC_MEMBER){|io| io.write(text)}
+  end
+  release
+end

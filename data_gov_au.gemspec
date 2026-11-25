@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.version = DataGovAu::VERSION
 
   spec.summary = "A client for data.gov.au's CKAN API, and the datasets built on it."
-  spec.description = "Find a dataset through data.gov.au's CKAN catalogue by its name or id, read what the catalogue says of it and of each of its resources, and download a resource once, checked against the length the catalogue reports. Built on it, the Australian Business Register's weekly ABN bulk extract, each release fetched once and kept."
+  spec.description = "Find a dataset through data.gov.au's CKAN catalogue by its name or id, read what the catalogue says of it and of each of its resources, and download a resource once, checked against the length the catalogue reports. Built on it, the Australian Business Register's weekly ABN bulk extract and ASIC's weekly company register, each release fetched once and kept, and read a record at a time."
 
   spec.author = 'thoran'
   spec.email = 'code@thoran.com'
@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   ].flatten
 
   spec.runtime_dependencies = [
+    ['dsv', '~> 0.13'],
     'http.rb',
     'ox',
     'rubyzip',

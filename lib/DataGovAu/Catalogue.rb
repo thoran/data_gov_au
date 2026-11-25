@@ -30,7 +30,7 @@ module DataGovAu
       yield(self) if block_given?
     end
 
-    # One call to the action API, giving up its result where the answer reports success.
+    # One call to the action API, returning its result where the answer reports success.
     def action(name, parameters = {})
       url = "#{@api_url}/#{name}"
       response = HTTP.get(url, parameters, {'User-Agent' => @user_agent})
